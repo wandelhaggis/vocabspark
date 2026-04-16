@@ -1,4 +1,5 @@
 Config.xcconfig
+*.xcodeproj/
 .DS_Store
 xcuserdata/
 DerivedData/

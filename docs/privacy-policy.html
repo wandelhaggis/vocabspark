@@ -3,39 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VocabSpark – Datenschutzerkl&auml;rung</title>
+    <title>VocabSpark &ndash; Privacy Policy / Datenschutzerkl&auml;rung</title>
     <style>
-        body { font-family: -apple-system, system-ui, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; line-height: 1.6; color: #333; }
-        h1 { font-size: 1.5em; }
-        h2 { font-size: 1.15em; margin-top: 1.5em; }
+        body { font-family: -apple-system, system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; line-height: 1.7; color: #2c2c2c; background: #fafafa; }
+        h1 { font-size: 1.6em; border-bottom: 2px solid #5856d6; padding-bottom: 8px; }
+        h2 { font-size: 1.2em; margin-top: 2em; color: #5856d6; }
+        h3 { font-size: 1.05em; margin-top: 1.5em; }
         .date { color: #888; font-size: 0.9em; }
+        .lang-switch { text-align: center; margin: 20px 0; }
+        .lang-switch a { display: inline-block; padding: 8px 20px; margin: 0 4px; border-radius: 20px; text-decoration: none; font-weight: 600; font-size: 0.9em; }
+        .lang-switch a.active { background: #5856d6; color: #fff; }
+        .lang-switch a:not(.active) { background: #e8e8ed; color: #333; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #e0e0e0; font-size: 0.95em; }
+        th { background: #f0f0f5; font-weight: 600; }
+        .highlight { background: #f0eeff; border-left: 3px solid #5856d6; padding: 12px 16px; border-radius: 4px; margin: 12px 0; }
+        a { color: #5856d6; }
+        section { display: none; }
+        section:target, section.default { display: block; }
+        footer { margin-top: 3em; padding-top: 1em; border-top: 1px solid #ddd; font-size: 0.85em; color: #888; }
     </style>
 </head>
 <body>
-    <h1>Datenschutzerkl&auml;rung &ndash; VocabSpark</h1>
-    <p class="date">Stand: 16. April 2026</p>
 
-    <h2>Kurz gesagt</h2>
-    <p>VocabSpark speichert alle Daten lokal auf deinem Ger&auml;t. Es werden keine pers&ouml;nlichen Daten an uns &uuml;bermittelt. Die App hat keine Benutzerkonten, kein Tracking und keine Werbung.</p>
+<h1>VocabSpark</h1>
+<p class="date">Stand / Last updated: 16. April 2026</p>
 
-    <h2>Welche Daten verarbeitet die App?</h2>
-    <ul>
-        <li><strong>Vokabeln und Lernfortschritt</strong> &ndash; werden ausschlie&szlig;lich lokal auf deinem iPad gespeichert (SwiftData).</li>
-        <li><strong>OpenAI API-Key</strong> &ndash; wird von dir selbst eingegeben und lokal auf dem Ger&auml;t gespeichert. Der Key wird nie an uns &uuml;bermittelt.</li>
-        <li><strong>API-Aufrufe an OpenAI</strong> &ndash; F&uuml;r die Aussprache (Text-to-Speech) und automatische Beispiels&auml;tze sendet die App einzelne W&ouml;rter oder kurze S&auml;tze an die OpenAI-API. Dies geschieht direkt zwischen deinem Ger&auml;t und OpenAI. Es gelten zus&auml;tzlich die <a href="https://openai.com/policies/privacy-policy">Datenschutzrichtlinien von OpenAI</a>.</li>
-        <li><strong>Benachrichtigungen</strong> &ndash; Optional kann eine t&auml;gliche Erinnerung aktiviert werden. Dies nutzt lokale iOS-Benachrichtigungen, es werden keine Daten &uuml;bertragen.</li>
-    </ul>
+<div class="lang-switch">
+    <a href="#de" class="active" onclick="show('de')">Deutsch</a>
+    <a href="#en" onclick="show('en')">English</a>
+</div>
 
-    <h2>Was wir NICHT tun</h2>
-    <ul>
-        <li>Keine Erfassung pers&ouml;nlicher Daten</li>
-        <li>Kein Tracking oder Analytics</li>
-        <li>Keine Werbung</li>
-        <li>Kein Verkauf von Daten an Dritte</li>
-        <li>Keine Server von uns &ndash; alle Daten bleiben auf deinem Ger&auml;t</li>
-    </ul>
+<!-- ==================== DEUTSCH ==================== -->
+<section id="de" class="default">
 
-    <h2>Kontakt</h2>
-    <p>Bei Fragen: <a href="mailto:michi.t.koenig@gmail.com">michi.t.koenig@gmail.com</a></p>
+<h2>Datenschutzerkl&auml;rung</h2>
+
+<div class="highlight">
+    <strong>Kurzfassung:</strong> VocabSpark speichert alle deine Daten lokal auf deinem Ger&auml;t. Wir haben keinen Server, kein Tracking, keine Werbung und keine Benutzerkonten. Die einzige externe Kommunikation sind API-Aufrufe an OpenAI &ndash; mit deinem eigenen API-Key.
+</div>
+
+<h3>1. Verantwortlicher</h3>
+<p>Michael K&ouml;nig<br>E-Mail: <a href="mailto:michi.t.koenig@gmail.com">michi.t.koenig@gmail.com</a></p>
+
+<h3>2. Welche Daten werden verarbeitet?</h3>
+<table>
+    <tr><th>Datenart</th><th>Wo gespeichert</th><th>Weitergabe</th></tr>
+    <tr><td>Vokabeln &amp; Lernfortschritt</td><td>Lokal auf dem Ger&auml;t (SwiftData)</td><td>Keine</td></tr>
+    <tr><td>Spracheinstellungen &amp; Streaks</td><td>Lokal auf dem Ger&auml;t</td><td>Keine</td></tr>
+    <tr><td>OpenAI API-Key</td><td>Lokal auf dem Ger&auml;t (UserDefaults)</td><td>Wird nur direkt an die OpenAI-API gesendet</td></tr>
+    <tr><td>Einzelne W&ouml;rter / S&auml;tze</td><td>Werden f&uuml;r TTS, &Uuml;bersetzung und Beispiels&auml;tze an OpenAI gesendet</td><td>OpenAI (siehe Abschnitt 3)</td></tr>
+    <tr><td>Benachrichtigungen</td><td>Lokale iOS-Benachrichtigungen</td><td>Keine</td></tr>
+</table>
+
+<h3>3. Drittanbieter: OpenAI</h3>
+<p>VocabSpark nutzt die OpenAI-API f&uuml;r drei Funktionen:</p>
+<ul>
+    <li><strong>Aussprache (Text-to-Speech)</strong> &ndash; Einzelne W&ouml;rter oder kurze S&auml;tze werden an OpenAI gesendet und als Audiodatei zur&uuml;ckgegeben. Die Audiodateien werden lokal gecacht.</li>
+    <li><strong>Beispiels&auml;tze</strong> &ndash; Beim Anlegen einer Vokabel wird ein einfacher Beispielsatz von GPT-4o-mini generiert.</li>
+    <li><strong>&Uuml;bersetzung</strong> &ndash; Optionale automatische &Uuml;bersetzung einzelner W&ouml;rter beim Hinzuf&uuml;gen.</li>
+</ul>
+<p>Diese Aufrufe erfolgen direkt von deinem Ger&auml;t an die OpenAI-Server &ndash; wir sehen diese Daten nicht. Es gilt die <a href="https://openai.com/policies/privacy-policy" target="_blank">Datenschutzerkl&auml;rung von OpenAI</a>. Du nutzt deinen eigenen API-Key, daher besteht ein direktes Vertragsverh&auml;ltnis zwischen dir und OpenAI.</p>
+
+<h3>4. Was wir NICHT tun</h3>
+<ul>
+    <li>Wir betreiben <strong>keine eigenen Server</strong></li>
+    <li>Wir erfassen <strong>keine personenbezogenen Daten</strong></li>
+    <li>Wir setzen <strong>kein Tracking, keine Analytics und keine Cookies</strong> ein</li>
+    <li>Wir zeigen <strong>keine Werbung</strong></li>
+    <li>Wir <strong>verkaufen keine Daten</strong> an Dritte</li>
+    <li>Wir erstellen <strong>keine Nutzerprofile</strong></li>
+</ul>
+
+<h3>5. Kinder und Jugendliche</h3>
+<p>VocabSpark wurde f&uuml;r Sch&uuml;lerinnen und Sch&uuml;ler entwickelt. Da die App keine personenbezogenen Daten erhebt, keine Benutzerkonten hat und keine Daten an unsere Server sendet, ist sie f&uuml;r die Nutzung durch Minderj&auml;hrige geeignet. Die Einrichtung des OpenAI API-Keys sollte durch eine erziehungsberechtigte Person erfolgen.</p>
+
+<h3>6. Datensicherheit</h3>
+<p>Alle lokalen Daten werden durch die Verschl&uuml;sselung von iOS gesch&uuml;tzt (Data Protection). Die Kommunikation mit der OpenAI-API erfolgt ausschlie&szlig;lich &uuml;ber HTTPS.</p>
+
+<h3>7. Deine Rechte</h3>
+<p>Da alle Daten lokal auf deinem Ger&auml;t gespeichert werden, hast du die volle Kontrolle. Du kannst:</p>
+<ul>
+    <li>Alle Vokabeln jederzeit in der App l&ouml;schen</li>
+    <li>Den API-Key in den Einstellungen entfernen</li>
+    <li>Die App deinstallieren, um alle Daten vollst&auml;ndig zu l&ouml;schen</li>
+    <li>Den TTS-Cache im iOS-Speicher l&ouml;schen</li>
+</ul>
+
+<h3>8. &Auml;nderungen</h3>
+<p>Bei &Auml;nderungen an dieser Datenschutzerkl&auml;rung wird das Datum oben aktualisiert. Bei wesentlichen &Auml;nderungen informieren wir &uuml;ber ein App-Update.</p>
+
+<h3>9. Kontakt</h3>
+<p>Michael K&ouml;nig<br>E-Mail: <a href="mailto:michi.t.koenig@gmail.com">michi.t.koenig@gmail.com</a></p>
+
+</section>
+
+<!-- ==================== ENGLISH ==================== -->
+<section id="en">
+
+<h2>Privacy Policy</h2>
+
+<div class="highlight">
+    <strong>In short:</strong> VocabSpark stores all your data locally on your device. We have no servers, no tracking, no ads, and no user accounts. The only external communication is API calls to OpenAI &ndash; using your own API key.
+</div>
+
+<h3>1. Data Controller</h3>
+<p>Michael K&ouml;nig<br>Email: <a href="mailto:michi.t.koenig@gmail.com">michi.t.koenig@gmail.com</a></p>
+
+<h3>2. What Data is Processed?</h3>
+<table>
+    <tr><th>Data Type</th><th>Stored Where</th><th>Shared With</th></tr>
+    <tr><td>Vocabulary &amp; learning progress</td><td>Locally on device (SwiftData)</td><td>None</td></tr>
+    <tr><td>Language settings &amp; streaks</td><td>Locally on device</td><td>None</td></tr>
+    <tr><td>OpenAI API key</td><td>Locally on device (UserDefaults)</td><td>Sent directly to OpenAI API only</td></tr>
+    <tr><td>Individual words / sentences</td><td>Sent to OpenAI for TTS, translation, and example sentences</td><td>OpenAI (see section 3)</td></tr>
+    <tr><td>Notifications</td><td>Local iOS notifications</td><td>None</td></tr>
+</table>
+
+<h3>3. Third Party: OpenAI</h3>
+<p>VocabSpark uses the OpenAI API for three features:</p>
+<ul>
+    <li><strong>Pronunciation (Text-to-Speech)</strong> &ndash; Individual words or short sentences are sent to OpenAI and returned as audio files, which are cached locally.</li>
+    <li><strong>Example sentences</strong> &ndash; When creating a vocabulary item, a simple example sentence is generated by GPT-4o-mini.</li>
+    <li><strong>Translation</strong> &ndash; Optional automatic translation of individual words when adding vocabulary.</li>
+</ul>
+<p>These calls are made directly from your device to OpenAI servers &ndash; we do not see this data. <a href="https://openai.com/policies/privacy-policy" target="_blank">OpenAI's Privacy Policy</a> applies. You use your own API key, establishing a direct relationship between you and OpenAI.</p>
+
+<h3>4. What We Do NOT Do</h3>
+<ul>
+    <li>We operate <strong>no servers</strong></li>
+    <li>We collect <strong>no personal data</strong></li>
+    <li>We use <strong>no tracking, analytics, or cookies</strong></li>
+    <li>We display <strong>no advertisements</strong></li>
+    <li>We <strong>do not sell data</strong> to third parties</li>
+    <li>We create <strong>no user profiles</strong></li>
+</ul>
+
+<h3>5. Children's Privacy</h3>
+<p>VocabSpark is designed for students. Since the app does not collect personal data, has no user accounts, and does not transmit data to our servers, it is suitable for use by minors. The OpenAI API key should be set up by a parent or guardian.</p>
+
+<h3>6. Data Security</h3>
+<p>All local data is protected by iOS Data Protection (device encryption). Communication with the OpenAI API uses HTTPS exclusively.</p>
+
+<h3>7. Your Rights</h3>
+<p>Since all data is stored locally on your device, you have full control. You can:</p>
+<ul>
+    <li>Delete all vocabulary at any time within the app</li>
+    <li>Remove the API key in Settings</li>
+    <li>Uninstall the app to permanently delete all data</li>
+    <li>Clear the TTS cache via iOS storage settings</li>
+</ul>
+
+<h3>8. Changes</h3>
+<p>If this privacy policy changes, the date at the top will be updated. For material changes, we will notify users via an app update.</p>
+
+<h3>9. Contact</h3>
+<p>Michael K&ouml;nig<br>Email: <a href="mailto:michi.t.koenig@gmail.com">michi.t.koenig@gmail.com</a></p>
+
+</section>
+
+<footer>
+    &copy; 2026 Michael K&ouml;nig &ndash; VocabSpark
+</footer>
+
+<script>
+function show(lang) {
+    document.querySelectorAll('section').forEach(s => { s.style.display = 'none'; s.classList.remove('default'); });
+    document.getElementById(lang).style.display = 'block';
+    document.querySelectorAll('.lang-switch a').forEach(a => a.classList.remove('active'));
+    document.querySelector('.lang-switch a[href="#' + lang + '"]').classList.add('active');
+}
+if (location.hash === '#en') show('en');
+</script>
+
 </body>
 </html>

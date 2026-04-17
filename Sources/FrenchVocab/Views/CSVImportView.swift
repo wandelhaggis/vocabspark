@@ -85,10 +85,29 @@ struct CSVImportView: View {
     }
 
     private func importAll() {
+        let language = deck.ttsLanguage
+        let deckName = deck.name
+        var insertedItems: [VocabItem] = []
+
         for entry in result.items {
             let item = VocabItem(term: entry.french, translation: entry.german, deck: deck)
             modelContext.insert(item)
+            insertedItems.append(item)
+            // Queue term-TTS prefetch immediately (serialized in TTSService)
+            TTSService.shared.prefetch(item.term, language: language)
         }
+
+        // Background: fetch example sentences + prefetch their TTS sequentially
+        // Serialized via ExampleSentenceService + TTSService internal queues.
+        Task {
+            for item in insertedItems {
+                await ExampleSentenceService.shared.fetchExample(for: item, languageName: deckName)
+                if let example = item.exampleSentence {
+                    TTSService.shared.prefetch(example, language: language)
+                }
+            }
+        }
+
         HapticService.success()
         imported = true
     }

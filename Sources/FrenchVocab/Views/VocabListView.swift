@@ -1,6 +1,5 @@
 import SwiftUI
 import SwiftData
-import UniformTypeIdentifiers
 
 enum TimeFilter: String, CaseIterable {
     case all = "Alle"
@@ -26,11 +25,6 @@ struct VocabListView: View {
     @State private var selectedForTest: Set<UUID> = []
     @State private var testDirection: LearningDirection = .random
     @State private var isTestActive = false
-
-    // CSV Import
-    @State private var showingFileImporter = false
-    @State private var importResult: CSVImportResult?
-    @State private var showingImport = false
 
     /// Items belonging to the current deck.
     var deckItems: [VocabItem] {
@@ -87,11 +81,15 @@ struct VocabListView: View {
                         }
                     }
                     ToolbarItem(placement: .primaryAction) {
-                        Button(selectedForTest.count == deckItems.count ? "Keine" : "Alle") {
-                            if selectedForTest.count == deckItems.count {
-                                selectedForTest.removeAll()
+                        // Fix #21: operate on filteredItems, not deckItems, so "Alle" matches
+                        // what the user actually sees (after search + time filter).
+                        let visibleIDs = Set(filteredItems.map(\.id))
+                        let allVisibleSelected = !visibleIDs.isEmpty && visibleIDs.isSubset(of: selectedForTest)
+                        Button(allVisibleSelected ? "Keine" : "Alle") {
+                            if allVisibleSelected {
+                                selectedForTest.subtract(visibleIDs)
                             } else {
-                                selectedForTest = Set(deckItems.map(\.id))
+                                selectedForTest.formUnion(visibleIDs)
                             }
                         }
                     }
@@ -109,12 +107,6 @@ struct VocabListView: View {
                     }
                     ToolbarItem(placement: .primaryAction) {
                         HStack(spacing: 16) {
-                            Button {
-                                showingFileImporter = true
-                            } label: {
-                                Image(systemName: "doc.badge.plus")
-                                    .font(.title3)
-                            }
                             if !deckItems.isEmpty {
                                 Button {
                                     withAnimation { isTestMode = true }
@@ -144,38 +136,12 @@ struct VocabListView: View {
             .sheet(item: $editingItem) { item in
                 EditVocabView(item: item, deck: deck)
             }
-            .sheet(isPresented: $showingImport) {
-                if let importResult {
-                    CSVImportView(result: importResult, deck: deck)
-                }
-            }
             .fullScreenCover(isPresented: $isTestActive) {
                 VocabTestSessionView(
                     items: selectedItems.shuffled(),
                     direction: testDirection,
                     deck: deck
                 )
-            }
-            .fileImporter(
-                isPresented: $showingFileImporter,
-                allowedContentTypes: [.commaSeparatedText, .plainText, .tabSeparatedText],
-                allowsMultipleSelection: false
-            ) { result in
-                switch result {
-                case .success(let urls):
-                    guard let url = urls.first else { return }
-                    guard url.startAccessingSecurityScopedResource() else { return }
-                    defer { url.stopAccessingSecurityScopedResource() }
-                    do {
-                        let data = try Data(contentsOf: url)
-                        importResult = try CSVImportService.parse(data: data)
-                        showingImport = true
-                    } catch {
-                        // Silently ignore parse errors for now
-                    }
-                case .failure:
-                    break
-                }
             }
         }
     }
@@ -269,6 +235,15 @@ struct VocabListView: View {
                             VocabRowView(item: item)
                         }
                         .tint(.primary)
+                        // Long-press → play TTS without leaving the list
+                        .simultaneousGesture(
+                            LongPressGesture(minimumDuration: 0.5)
+                                .onEnded { _ in
+                                    guard TTSService.shared.isAvailable else { return }
+                                    HapticService.medium()
+                                    Task { await TTSService.shared.speak(item.term, language: deck.ttsLanguage) }
+                                }
+                        )
                     }
                 }
                 .onDelete(perform: isTestMode ? nil : deleteItems)

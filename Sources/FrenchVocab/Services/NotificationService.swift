@@ -1,4 +1,5 @@
 import UserNotifications
+import Foundation
 
 @MainActor
 class NotificationService {
@@ -8,14 +9,16 @@ class NotificationService {
     private let center = UNUserNotificationCenter.current()
     private let dailyID = "daily-reminder"
 
-    func enableReminder() async {
+    /// Enable reminder at the given time. Also used to re-schedule after time changes.
+    func enableReminder(hour: Int, minute: Int) async {
         let settings = await center.notificationSettings()
         if settings.authorizationStatus == .notDetermined {
             let granted = (try? await center.requestAuthorization(options: [.alert, .sound, .badge])) ?? false
             guard granted else { return }
         }
-        guard settings.authorizationStatus != .denied else { return }
-        scheduleDailyReminder()
+        let refreshed = await center.notificationSettings()
+        guard refreshed.authorizationStatus != .denied else { return }
+        scheduleDailyReminder(hour: hour, minute: minute)
     }
 
     func disableReminder() {
@@ -28,17 +31,17 @@ class NotificationService {
         return settings.authorizationStatus == .authorized
     }
 
-    private func scheduleDailyReminder() {
+    private func scheduleDailyReminder(hour: Int, minute: Int) {
         center.removePendingNotificationRequests(withIdentifiers: [dailyID])
 
         let content = UNMutableNotificationContent()
-        content.title = "Zeit zum Lernen! \u{1F1EB}\u{1F1F7}"
+        content.title = "Zeit zum Lernen! \u{1F4DA}"
         content.body = "Deine Vokabeln warten. Nur 5 Minuten!"
         content.sound = .default
 
         var when = DateComponents()
-        when.hour = 17
-        when.minute = 0
+        when.hour = hour
+        when.minute = minute
 
         let trigger = UNCalendarNotificationTrigger(dateMatching: when, repeats: true)
         let request = UNNotificationRequest(identifier: dailyID, content: content, trigger: trigger)

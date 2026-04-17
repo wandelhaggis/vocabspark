@@ -2,17 +2,17 @@ import Foundation
 import AVFoundation
 import CryptoKit
 
-/// Calls OpenAI TTS for French pronunciation.
+/// Calls OpenAI TTS for pronunciation.
 /// Caches audio files locally so repeated cards don't cost extra API calls.
 @MainActor
 class TTSService: ObservableObject {
 
     static let shared = TTSService()
 
-    /// User-configured key (Settings) takes priority, falls back to build-time config (development).
+    /// User-configured key (Keychain) takes priority, falls back to build-time config (development).
     private var apiKey: String {
-        if let userKey = UserDefaults.standard.string(forKey: "openai_api_key"), !userKey.isEmpty {
-            return userKey
+        if let keychainKey = KeychainService.load(), !keychainKey.isEmpty {
+            return keychainKey
         }
         return Bundle.main.infoDictionary?["OPENAI_API_KEY"] as? String ?? ""
     }
@@ -30,28 +30,67 @@ class TTSService: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
 
+    /// Fix #14: Rate-limit debounce — ignore taps closer than 300ms apart.
+    private var lastSpeakTime: Date = .distantPast
+
+    /// Background prefetch queue — serialized so we never fire parallel TTS requests.
+    /// Independent from user-initiated `speak()` calls.
+    private var prefetchChain: Task<Void, Never>?
+
     /// Whether the API key is configured and TTS can work.
     var isAvailable: Bool { !apiKey.isEmpty }
+
+    /// Compute the deterministic cache file URL for a given text + language.
+    private func cacheFile(for text: String, language: String) -> URL {
+        let normalized = "\(language):\(text.lowercased().trimmingCharacters(in: .whitespacesAndNewlines))"
+        let hash = SHA256.hash(data: Data(normalized.utf8))
+        let hashString = hash.prefix(12).map { String(format: "%02x", $0) }.joined()
+        return cacheDir.appendingPathComponent("\(hashString).mp3")
+    }
+
+    /// Silent background download — caches the audio so a later `speak()` is instant.
+    /// No playback, no debounce, no UI state. Fire-and-forget.
+    func prefetch(_ text: String, language: String) {
+        guard isAvailable else { return }
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        let target = cacheFile(for: trimmed, language: language)
+        // Skip if already cached — check synchronously, no need to queue
+        if FileManager.default.fileExists(atPath: target.path) { return }
+
+        let previous = prefetchChain
+        prefetchChain = Task { [weak self] in
+            _ = await previous?.result
+            guard let self else { return }
+            // Re-check in case another prefetch just finished the same file
+            if FileManager.default.fileExists(atPath: target.path) { return }
+            do {
+                let data = try await self.fetchTTS(text: trimmed, language: language)
+                try data.write(to: target)
+            } catch {
+                // Silent — user will see error when they tap play
+            }
+        }
+    }
 
     /// Speak text in the given language. Uses cache if available.
     func speak(_ text: String, language: String = "French") async {
         guard isAvailable else { return }
 
+        // Fix #14: Debounce rapid taps
+        let now = Date()
+        guard now.timeIntervalSince(lastSpeakTime) >= 0.3 else { return }
+        lastSpeakTime = now
+
         errorMessage = nil
 
-        // Deterministic cache key using SHA256 (stable across app launches)
-        let normalized = text.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-        let hash = SHA256.hash(data: Data(normalized.utf8))
-        let hashString = hash.prefix(12).map { String(format: "%02x", $0) }.joined()
-        let cacheFile = cacheDir.appendingPathComponent("\(hashString).mp3")
+        let cacheFile = cacheFile(for: text, language: language)
 
-        // Check cache first
         if FileManager.default.fileExists(atPath: cacheFile.path) {
             await playAudio(from: cacheFile)
             return
         }
 
-        // Fetch from OpenAI
         isLoading = true
         defer { isLoading = false }
 
@@ -75,6 +114,42 @@ class TTSService: ObservableObject {
         isLoading = false
     }
 
+    /// Fix #13: Cleanup oldest cache files if cache grows beyond 100 MB.
+    /// Call on app launch.
+    static func cleanupCacheIfNeeded() {
+        let cacheDir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("tts_cache", isDirectory: true)
+        let keys: Set<URLResourceKey> = [.totalFileAllocatedSizeKey, .contentAccessDateKey]
+        guard let files = try? FileManager.default.contentsOfDirectory(
+            at: cacheDir,
+            includingPropertiesForKeys: Array(keys)
+        ) else { return }
+
+        // Compute total size
+        var totalSize: Int64 = 0
+        var fileInfo: [(url: URL, size: Int64, accessed: Date)] = []
+        for url in files {
+            guard let values = try? url.resourceValues(forKeys: keys),
+                  let size = values.totalFileAllocatedSize,
+                  let accessed = values.contentAccessDate else { continue }
+            totalSize += Int64(size)
+            fileInfo.append((url, Int64(size), accessed))
+        }
+
+        let maxSize: Int64 = 100 * 1024 * 1024  // 100 MB
+        let targetSize: Int64 = 50 * 1024 * 1024  // cleanup down to 50 MB
+        guard totalSize > maxSize else { return }
+
+        // Sort by access date ascending (oldest first)
+        let sorted = fileInfo.sorted { $0.accessed < $1.accessed }
+        var remaining = totalSize
+        for item in sorted {
+            if remaining <= targetSize { break }
+            try? FileManager.default.removeItem(at: item.url)
+            remaining -= item.size
+        }
+    }
+
     private func fetchTTS(text: String, language: String) async throws -> Data {
         var request = URLRequest(url: URL(string: "https://api.openai.com/v1/audio/speech")!)
         request.httpMethod = "POST"
@@ -95,7 +170,7 @@ class TTSService: ObservableObject {
               httpResponse.statusCode == 200 else {
             let errorBody = String(data: data, encoding: .utf8) ?? "unknown"
             let status = (response as? HTTPURLResponse)?.statusCode ?? -1
-            print("⚠️ TTS API error (\(status)): \(errorBody)")
+            print("\u{26A0}\u{FE0F} TTS API error (\(status)): \(errorBody)")
             throw TTSError.apiError
         }
         return data
@@ -112,8 +187,11 @@ class TTSService: ObservableObject {
                 try await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
             }
             isPlaying = false
+            // Fix #10: release audio session so other apps' audio resumes
+            try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         } catch is CancellationError {
             isPlaying = false
+            try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         } catch {
             isPlaying = false
         }

@@ -48,7 +48,10 @@ struct SessionSetupView: View {
         let totalGood = sessions.reduce(0) { $0 + $1.goodCount }
         let totalCards = sessions.reduce(0) { $0 + $1.totalCards }
         guard totalCards > 0 else { return 0 }
-        return Int(Double(totalGood) / Double(totalCards) * 100)
+        // Cap at 100% — legacy session records from the race-condition bug
+        // may have goodCount > totalCards.
+        let rate = Double(totalGood) / Double(totalCards) * 100
+        return min(100, Int(rate))
     }
 
     var body: some View {
@@ -100,6 +103,10 @@ struct SessionSetupView: View {
                         }
                     }
                     .padding(.horizontal)
+
+                    // Progress chart (tap to flip between views)
+                    ProgressChartView(deck: deck)
+                        .padding(.horizontal)
 
                     // Direction picker
                     VStack(alignment: .leading, spacing: 10) {

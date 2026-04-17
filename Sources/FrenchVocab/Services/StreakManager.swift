@@ -18,8 +18,14 @@ class StreakManager: ObservableObject {
         longestStreak = defaults.integer(forKey: longestStreakKey)
     }
 
+    /// Minimum cards required to count a session towards the streak.
+    /// Prevents single-card "cheat" sessions.
+    static let minCardsForStreak = 10
+
     /// Call when a learning session is completed.
-    func recordSession() {
+    /// Only counts if the session had at least `minCardsForStreak` cards.
+    func recordSession(cardCount: Int) {
+        guard cardCount >= Self.minCardsForStreak else { return }
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
 

@@ -49,10 +49,12 @@ struct SRSEngine {
             item.repetitions += 1
         }
 
-        item.nextReviewDate = Calendar.current.date(
+        // Fix #7: normalize to start-of-day so cards are due "on day X", not "at time X"
+        let targetDate = Calendar.current.date(
             byAdding: .day,
             value: item.interval,
             to: now
         ) ?? now.addingTimeInterval(86400)
+        item.nextReviewDate = Calendar.current.startOfDay(for: targetDate)
     }
 }

@@ -47,7 +47,9 @@ final class VocabItem {
     }
 
     var category: VocabCategory {
-        if repetitions == 0 { return .neu }
+        // Fix #17: use lastReviewedAt — a card once reviewed is never "Neu" again,
+        // even after a .again rating which resets repetitions to 0.
+        if lastReviewedAt == nil { return .neu }
         if interval <= 1 { return .lernen }
         if interval <= 7 { return .festigen }
         return .bekannt
@@ -56,7 +58,13 @@ final class VocabItem {
     var statusLabel: String { category.rawValue }
 
     func applyCategory(_ cat: VocabCategory) {
+        // Fix #18: normalize nextReviewDate to start-of-day — matches SRSEngine behavior
         let now = Date()
+        let calendar = Calendar.current
+        func dueDate(offsetDays: Int) -> Date {
+            let target = calendar.date(byAdding: .day, value: offsetDays, to: now) ?? now
+            return calendar.startOfDay(for: target)
+        }
         switch cat {
         case .neu:
             repetitions = 0
@@ -67,17 +75,20 @@ final class VocabItem {
             repetitions = 1
             interval = 1
             easeFactor = max(easeFactor, 2.0)
-            nextReviewDate = Calendar.current.date(byAdding: .day, value: 1, to: now) ?? now
+            nextReviewDate = dueDate(offsetDays: 1)
+            if lastReviewedAt == nil { lastReviewedAt = now }
         case .festigen:
             repetitions = 2
             interval = 4
             easeFactor = max(easeFactor, 2.0)
-            nextReviewDate = Calendar.current.date(byAdding: .day, value: 4, to: now) ?? now
+            nextReviewDate = dueDate(offsetDays: 4)
+            if lastReviewedAt == nil { lastReviewedAt = now }
         case .bekannt:
             repetitions = 3
             interval = 14
             easeFactor = max(easeFactor, 2.3)
-            nextReviewDate = Calendar.current.date(byAdding: .day, value: 14, to: now) ?? now
+            nextReviewDate = dueDate(offsetDays: 14)
+            if lastReviewedAt == nil { lastReviewedAt = now }
         }
     }
 }

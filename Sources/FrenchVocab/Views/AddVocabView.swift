@@ -11,6 +11,12 @@ struct AddVocabView: View {
     @State private var translation = ""
     @State private var savedCount = 0
     @State private var isTranslating = false
+    @State private var showUnsavedAlert = false
+
+    private var hasUnsavedInput: Bool {
+        !term.trimmingCharacters(in: .whitespaces).isEmpty ||
+        !translation.trimmingCharacters(in: .whitespaces).isEmpty
+    }
 
     @FocusState private var focusedField: Field?
 
@@ -43,6 +49,8 @@ struct AddVocabView: View {
                             .font(.title3)
                         TextField(deck.name, text: $term)
                             .focused($focusedField, equals: .term)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
                             .submitLabel(.next)
                             .onSubmit { focusedField = .translation }
                         if canTranslateToTerm && !isTranslating {
@@ -63,6 +71,8 @@ struct AddVocabView: View {
                             .font(.title3)
                         TextField("Deutsch", text: $translation)
                             .focused($focusedField, equals: .translation)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
                             .submitLabel(.done)
                             .onSubmit { saveAndClear() }
                         if canTranslateToTranslation && !isTranslating {
@@ -112,11 +122,42 @@ struct AddVocabView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Fertig") { dismiss() }
+                    Button("Fertig") {
+                        // Fix #15: warn before discarding half-typed vocab
+                        if hasUnsavedInput {
+                            showUnsavedAlert = true
+                        } else {
+                            dismiss()
+                        }
+                    }
                 }
+            }
+            .alert("Nicht gespeicherte Eingabe?", isPresented: $showUnsavedAlert) {
+                Button("Verwerfen", role: .destructive) { dismiss() }
+                Button("Zur\u{FC}ck", role: .cancel) { }
+            } message: {
+                Text("Die aktuell eingegebene Vokabel wird nicht gespeichert.")
             }
             .onAppear {
                 focusedField = .term
+            }
+        }
+    }
+
+    /// Kick off background work for a newly added item:
+    /// 1. Prefetch TTS for the term (parallel, cheap)
+    /// 2. Fetch example sentence
+    /// 3. Once example is ready, prefetch its TTS too
+    private func prefetchAudioAndExample(for item: VocabItem) {
+        let language = deck.ttsLanguage
+        let deckName = deck.name
+        // Start term-TTS download immediately
+        TTSService.shared.prefetch(item.term, language: language)
+        // Example sentence + its TTS run sequentially in the background
+        Task {
+            await ExampleSentenceService.shared.fetchExample(for: item, languageName: deckName)
+            if let example = item.exampleSentence {
+                TTSService.shared.prefetch(example, language: language)
             }
         }
     }
@@ -151,7 +192,7 @@ struct AddVocabView: View {
             deck: deck
         )
         modelContext.insert(item)
-        Task { await ExampleSentenceService.shared.fetchExample(for: item, languageName: deck.name) }
+        prefetchAudioAndExample(for: item)
         HapticService.light()
         savedCount += 1
         term = ""

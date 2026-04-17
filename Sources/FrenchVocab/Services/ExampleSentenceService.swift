@@ -9,10 +9,14 @@ class ExampleSentenceService: ObservableObject {
 
     @Published var loadingItemIDs: Set<UUID> = []
 
-    /// User-configured key (Settings) takes priority, falls back to build-time config (development).
+    /// Fix #11: serialize example/translate requests so we don't flood the API
+    /// when the user adds many vocab items in quick succession.
+    private var requestChain: Task<Void, Never>?
+
+    /// User-configured key (Keychain) takes priority, falls back to build-time config (development).
     private var apiKey: String {
-        if let userKey = UserDefaults.standard.string(forKey: "openai_api_key"), !userKey.isEmpty {
-            return userKey
+        if let keychainKey = KeychainService.load(), !keychainKey.isEmpty {
+            return keychainKey
         }
         return Bundle.main.infoDictionary?["OPENAI_API_KEY"] as? String ?? ""
     }
@@ -20,22 +24,18 @@ class ExampleSentenceService: ObservableObject {
     var isAvailable: Bool { !apiKey.isEmpty }
 
     /// Fetch an example sentence and store it on the item. No-op if already present.
+    /// Serialized with other requests to avoid API rate limiting.
     func fetchExample(for item: VocabItem, languageName: String = "Franz\u{F6}sisch") async {
         guard isAvailable else { return }
         guard item.exampleSentence == nil else { return }
 
-        loadingItemIDs.insert(item.id)
-        defer { loadingItemIDs.remove(item.id) }
-
-        do {
-            let (sentence, translation) = try await requestExample(term: item.term, translation: item.translation, languageName: languageName)
-            item.exampleSentence = sentence
-            item.exampleTranslation = translation
-        } catch let error as URLError where error.code == .notConnectedToInternet || error.code == .networkConnectionLost {
-            // Network error — ignore silently, user will see TTS error if they try
-        } catch {
-            // Other errors — silent failure
+        let previous = requestChain
+        let newTask = Task { [weak self] in
+            _ = await previous?.result
+            await self?.performFetch(for: item, languageName: languageName)
         }
+        requestChain = newTask
+        await newTask.value
     }
 
     /// Clear existing example and fetch a fresh one (e.g. after editing the word).
@@ -43,7 +43,10 @@ class ExampleSentenceService: ObservableObject {
         guard isAvailable else { return }
         item.exampleSentence = nil
         item.exampleTranslation = nil
+        await fetchExample(for: item, languageName: languageName)
+    }
 
+    private func performFetch(for item: VocabItem, languageName: String) async {
         loadingItemIDs.insert(item.id)
         defer { loadingItemIDs.remove(item.id) }
 
@@ -52,7 +55,7 @@ class ExampleSentenceService: ObservableObject {
             item.exampleSentence = sentence
             item.exampleTranslation = translation
         } catch {
-            // Silent failure
+            // Silent failure — example is optional
         }
     }
 

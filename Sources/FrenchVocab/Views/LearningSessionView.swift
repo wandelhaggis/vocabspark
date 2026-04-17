@@ -7,14 +7,28 @@ struct LearningSessionView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.horizontalSizeClass) private var hSize
     @ObservedObject private var tts = TTSService.shared
     @ObservedObject private var streakManager = StreakManager.shared
+
+    // Fix #6: adaptive sizing for iPhone (compact) vs iPad (regular)
+    private var promptFontSize: CGFloat { hSize == .compact ? 28 : 34 }
+    private var answerFontSize: CGFloat { hSize == .compact ? 24 : 30 }
+    private var cardPadding: CGFloat { hSize == .compact ? 20 : 32 }
 
     // Deck-based: cards cycle until all rated .good
     @State private var cardDeck: [VocabItem]
     @State private var mastered: Set<UUID> = []
     @State private var isRevealed = false
     @State private var sessionResults: [SRSRating] = []
+    /// Worst rating per card in this session — used for final SRS update.
+    @State private var cardWorstRating: [UUID: SRSRating] = [:]
+    /// Fix #1: lock to prevent double-rate during the success flash animation.
+    @State private var isAdvancing = false
+    /// Fix #19: hold the flash-advance task so we can cancel on dismiss.
+    @State private var advanceTask: Task<Void, Never>?
+    /// Fix #4: prevent saveSession from running twice.
+    @State private var sessionSaved = false
     @State private var showingSummary = false
     @State private var resolvedDirection: LearningDirection = .frToDE
     @State private var ttsTask: Task<Void, Never>?
@@ -76,7 +90,10 @@ struct LearningSessionView: View {
         }
         .onDisappear {
             ttsTask?.cancel()
+            advanceTask?.cancel()  // Fix #19
             tts.stop()
+            // Fix #4: save partial progress when user abandons session
+            saveSession()
         }
     }
 
@@ -141,7 +158,7 @@ struct LearningSessionView: View {
                         .tracking(1.5)
 
                     Text(promptText)
-                        .font(.system(size: 34, weight: .semibold, design: .rounded))
+                        .font(.system(size: promptFontSize, weight: .semibold, design: .rounded))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
 
@@ -155,7 +172,7 @@ struct LearningSessionView: View {
                     }
                 }
                 .frame(maxWidth: .infinity)
-                .padding(32)
+                .padding(cardPadding)
                 .background(.background)
                 .clipShape(RoundedRectangle(cornerRadius: 20))
                 .shadow(color: .black.opacity(0.08), radius: 12, y: 4)
@@ -171,7 +188,7 @@ struct LearningSessionView: View {
                             .tracking(1.5)
 
                         Text(answerText)
-                            .font(.system(size: 30, weight: .medium, design: .rounded))
+                            .font(.system(size: answerFontSize, weight: .medium, design: .rounded))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
 
@@ -369,24 +386,27 @@ struct LearningSessionView: View {
     /// - .hard  = move to end of deck (comes back this session)
     /// - .good  = remove from deck (done for this session) + apply SRS
     private func rate(_ rating: SRSRating) {
-        guard let item = current else { return }
+        // Fix #1: block rapid re-taps during the success-flash delay
+        guard !isAdvancing, let item = current else { return }
 
-        // Apply SRS for all ratings
-        SRSEngine.apply(rating: rating, to: item)
-        sessionResults.append(rating)
+        // Track worst rating per card (raw value: .again=0 < .hard=1 < .good=2)
+        let previousWorst = cardWorstRating[item.id]?.rawValue ?? Int.max
+        if rating.rawValue < previousWorst {
+            cardWorstRating[item.id] = rating
+        }
 
         ttsTask?.cancel()
         tts.stop()
 
         switch rating {
         case .again:
-            // Sofort nochmal: just reset reveal, card stays at front
+            // Sofort nochmal: card stays at front, no SRS update yet
             HapticService.medium()
             isRevealed = false
             resolveDirection()
 
         case .hard:
-            // Ans Ende setzen: remove from front, append to back
+            // Ans Ende setzen: no SRS update yet, card comes back later
             HapticService.medium()
             cardDeck.removeFirst()
             cardDeck.append(item)
@@ -394,14 +414,35 @@ struct LearningSessionView: View {
             resolveDirection()
 
         case .good:
-            // Fertig: remove from deck
+            // Fertig: apply SRS ONCE with the worst rating of this card in this session
+            isAdvancing = true
             HapticService.success()
             showSuccessFlash = true
-            mastered.insert(item.id)
-            Task {
+            let finalRating = cardWorstRating[item.id] ?? .good
+            // Track category transition for the progress chart
+            let oldCategory = item.category
+            SRSEngine.apply(rating: finalRating, to: item)
+            let newCategory = item.category
+            if oldCategory != newCategory {
+                modelContext.insert(MasteryEvent(
+                    vocabItemID: item.id,
+                    from: oldCategory,
+                    to: newCategory,
+                    deck: item.deck
+                ))
+            }
+            sessionResults.append(finalRating)
+            advanceTask = Task {
                 try? await Task.sleep(nanoseconds: 350_000_000)
-                showSuccessFlash = false
-                cardDeck.removeFirst()
+                // Fix #19: abort if the view was dismissed during the flash
+                guard !Task.isCancelled else { return }
+                // Fix #2: update mastered + deck together with animation
+                withAnimation {
+                    showSuccessFlash = false
+                    mastered.insert(item.id)
+                    cardDeck.removeFirst()
+                }
+                isAdvancing = false
                 if cardDeck.isEmpty {
                     saveSession()
                     withAnimation { showingSummary = true }
@@ -414,18 +455,22 @@ struct LearningSessionView: View {
     }
 
     private func saveSession() {
+        // Fix #4: idempotent — called from both .onDisappear and completion
+        guard !sessionSaved, !sessionResults.isEmpty else { return }
+        sessionSaved = true
+
         let againCount = sessionResults.filter { $0 == .again }.count
         let hardCount = sessionResults.filter { $0 == .hard }.count
         let goodCount = sessionResults.filter { $0 == .good }.count
 
         let record = SessionRecord(
-            totalCards: totalCount,
+            totalCards: sessionResults.count,
             againCount: againCount,
             hardCount: hardCount,
             goodCount: goodCount
         )
         modelContext.insert(record)
-        streakManager.recordSession()
+        streakManager.recordSession(cardCount: sessionResults.count)
     }
 
     private func resolveDirection() {

@@ -8,7 +8,12 @@ struct VocabTestSessionView: View {
     let deck: LanguageDeck
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var hSize
     @ObservedObject private var tts = TTSService.shared
+
+    private var promptFontSize: CGFloat { hSize == .compact ? 28 : 34 }
+    private var answerFontSize: CGFloat { hSize == .compact ? 24 : 30 }
+    private var cardPadding: CGFloat { hSize == .compact ? 20 : 32 }
 
     @State private var cardDeck: [VocabItem]
     @State private var mastered: Set<UUID> = []
@@ -16,8 +21,11 @@ struct VocabTestSessionView: View {
     @State private var showingSummary = false
     @State private var resolvedDirection: LearningDirection = .frToDE
     @State private var ttsTask: Task<Void, Never>?
-    @State private var round = 1
+    /// Fix #20: track IDs that were shown more than once (= not mastered on first attempt)
+    @State private var repeatedCards: Set<UUID> = []
     @State private var showSuccessFlash = false
+    @State private var isAdvancing = false
+    @State private var advanceTask: Task<Void, Never>?
 
     @FocusState private var isFocused: Bool
 
@@ -67,6 +75,7 @@ struct VocabTestSessionView: View {
         }
         .onDisappear {
             ttsTask?.cancel()
+            advanceTask?.cancel()  // Fix #19
             tts.stop()
         }
     }
@@ -115,8 +124,8 @@ struct VocabTestSessionView: View {
                     .fontWeight(.semibold)
                     .fontDesign(.rounded)
                     .foregroundStyle(.secondary)
-                if round > 1 {
-                    Text("(Runde \(round))")
+                if !repeatedCards.isEmpty {
+                    Text("\u{B7} \(repeatedCards.count) wiederholt")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
@@ -137,7 +146,7 @@ struct VocabTestSessionView: View {
                         .tracking(1.5)
 
                     Text(promptText)
-                        .font(.system(size: 34, weight: .semibold, design: .rounded))
+                        .font(.system(size: promptFontSize, weight: .semibold, design: .rounded))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
 
@@ -151,7 +160,7 @@ struct VocabTestSessionView: View {
                     }
                 }
                 .frame(maxWidth: .infinity)
-                .padding(32)
+                .padding(cardPadding)
                 .background(.background)
                 .clipShape(RoundedRectangle(cornerRadius: 20))
                 .shadow(color: .black.opacity(0.08), radius: 12, y: 4)
@@ -167,7 +176,7 @@ struct VocabTestSessionView: View {
                             .tracking(1.5)
 
                         Text(answerText)
-                            .font(.system(size: 30, weight: .medium, design: .rounded))
+                            .font(.system(size: answerFontSize, weight: .medium, design: .rounded))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
 
@@ -358,43 +367,48 @@ struct VocabTestSessionView: View {
     }
 
     private func rateNochmal() {
-        guard !cardDeck.isEmpty else { return }
+        guard !isAdvancing, !cardDeck.isEmpty else { return }
         HapticService.medium()
         ttsTask?.cancel()
         tts.stop()
 
         let item = cardDeck.removeFirst()
+        // Fix #20: this card will be seen again, mark it as repeated
+        repeatedCards.insert(item.id)
         // Insert at a random later position so the card comes back
         let insertAt = cardDeck.isEmpty ? 0 : Int.random(in: min(2, cardDeck.count)...cardDeck.count)
         cardDeck.insert(item, at: insertAt)
-        round = max(round, mastered.count == 0 ? 1 : 2)
 
         isRevealed = false
         resolveDirection()
-        // TTS only on user tap
     }
 
     private func rateMastered() {
-        guard let item = cardDeck.first else { return }
+        // Fix #1: block rapid re-taps during flash animation
+        guard !isAdvancing, let item = cardDeck.first else { return }
+        isAdvancing = true
         HapticService.success()
         ttsTask?.cancel()
         tts.stop()
 
-        // Show green flash, then advance after 350ms
         showSuccessFlash = true
-        Task {
+        advanceTask = Task {
             try? await Task.sleep(nanoseconds: 350_000_000)
-            showSuccessFlash = false
-
-            cardDeck.removeFirst()
-            mastered.insert(item.id)
+            // Fix #19: abort if the view was dismissed during the flash
+            guard !Task.isCancelled else { return }
+            // Fix #2: progress + card-removal happen together
+            withAnimation {
+                showSuccessFlash = false
+                mastered.insert(item.id)
+                cardDeck.removeFirst()
+            }
+            isAdvancing = false
 
             if cardDeck.isEmpty {
                 withAnimation { showingSummary = true }
             } else {
                 isRevealed = false
                 resolveDirection()
-                // TTS only on user tap
             }
         }
     }
@@ -426,15 +440,16 @@ struct VocabTestSessionView: View {
                     .font(.title3)
                     .fontWeight(.semibold)
                     .fontDesign(.rounded)
-                if round > 1 {
-                    Text("In \(round) Runden")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                } else {
+                // Fix #20: only claim "first try" if no card was ever repeated
+                if repeatedCards.isEmpty {
                     Text("Alles beim ersten Mal!")
                         .font(.subheadline)
                         .foregroundStyle(.green)
                         .fontWeight(.medium)
+                } else {
+                    Text("\(repeatedCards.count) Vokabel\(repeatedCards.count == 1 ? "" : "n") wiederholt")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
             }
             .padding(24)

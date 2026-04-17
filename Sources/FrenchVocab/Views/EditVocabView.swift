@@ -4,6 +4,7 @@ struct EditVocabView: View {
     let item: VocabItem
     let deck: LanguageDeck
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
 
     @State private var term: String
     @State private var translation: String
@@ -42,6 +43,8 @@ struct EditVocabView: View {
                             .font(.title3)
                         TextField(deck.name, text: $term)
                             .focused($focusedField, equals: .term)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
                             .submitLabel(.next)
                             .onSubmit { focusedField = .translation }
                     }
@@ -50,19 +53,30 @@ struct EditVocabView: View {
                             .font(.title3)
                         TextField("Deutsch", text: $translation)
                             .focused($focusedField, equals: .translation)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
                             .submitLabel(.done)
                             .onSubmit { save() }
                     }
                 }
 
                 // Category picker
-                Section("Kategorie") {
+                Section {
                     Picker("Kategorie", selection: $selectedCategory) {
                         ForEach(VocabCategory.allCases, id: \.self) { cat in
                             Text(cat.rawValue).tag(cat)
                         }
                     }
                     .pickerStyle(.segmented)
+                } header: {
+                    Text("Kategorie")
+                } footer: {
+                    // Fix #3: warn about SRS reset when manually changing category
+                    if selectedCategory != item.category {
+                        Label("Setzt den Lernfortschritt zur\u{FC}ck", systemImage: "exclamationmark.triangle.fill")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                    }
                 }
 
                 // Example sentence (read-only)
@@ -131,19 +145,49 @@ struct EditVocabView: View {
         item.term = term.trimmingCharacters(in: .whitespaces)
         item.translation = translation.trimmingCharacters(in: .whitespaces)
         if selectedCategory != item.category {
+            let oldCategory = item.category
             item.applyCategory(selectedCategory)
+            modelContext.insert(MasteryEvent(
+                vocabItemID: item.id,
+                from: oldCategory,
+                to: selectedCategory,
+                deck: deck
+            ))
         }
         // Re-fetch example if words changed or none exists
-        if wordsChanged || item.exampleSentence == nil {
-            Task { await ExampleSentenceService.shared.refetchExample(for: item, languageName: deck.name) }
+        if wordsChanged {
+            // Word changed — prefetch new TTS immediately, then refresh example + its TTS
+            TTSService.shared.prefetch(item.term, language: deck.ttsLanguage)
+            let language = deck.ttsLanguage
+            let deckName = deck.name
+            Task {
+                await ExampleSentenceService.shared.refetchExample(for: item, languageName: deckName)
+                if let example = item.exampleSentence {
+                    TTSService.shared.prefetch(example, language: language)
+                }
+            }
+        } else if item.exampleSentence == nil {
+            let language = deck.ttsLanguage
+            let deckName = deck.name
+            Task {
+                await ExampleSentenceService.shared.fetchExample(for: item, languageName: deckName)
+                if let example = item.exampleSentence {
+                    TTSService.shared.prefetch(example, language: language)
+                }
+            }
         }
         dismiss()
     }
 
     private func loadExample() {
         isLoadingExample = true
+        let language = deck.ttsLanguage
+        let deckName = deck.name
         Task {
-            await ExampleSentenceService.shared.fetchExample(for: item, languageName: deck.name)
+            await ExampleSentenceService.shared.fetchExample(for: item, languageName: deckName)
+            if let example = item.exampleSentence {
+                TTSService.shared.prefetch(example, language: language)
+            }
             isLoadingExample = false
         }
     }

@@ -143,7 +143,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Import f\u{FC}r \(deck.emoji) \(deck.name)")
                 } footer: {
-                    Text("Importiere eine CSV-/TXT-Datei mit Fremdsprache;Deutsch pro Zeile.")
+                    Text("Importiere eine CSV-/TXT-Datei mit \(deck.name);\(deck.nativeDisplayName) pro Zeile.")
                 }
             }
             .navigationTitle("Einstellungen")

@@ -49,9 +49,9 @@ struct EditVocabView: View {
                             .onSubmit { focusedField = .translation }
                     }
                     HStack {
-                        Text("\u{1F1E9}\u{1F1EA}")
+                        Text(deck.nativeEmoji)
                             .font(.title3)
-                        TextField("Deutsch", text: $translation)
+                        TextField(deck.nativeDisplayName, text: $translation)
                             .focused($focusedField, equals: .translation)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
@@ -85,7 +85,7 @@ struct EditVocabView: View {
                         VStack(alignment: .leading, spacing: 6) {
                             Text("\(deck.emoji) \u{AB}\(sentence)\u{BB}")
                                 .font(.subheadline)
-                            Text("\u{1F1E9}\u{1F1EA} \u{AB}\(trans)\u{BB}")
+                            Text("\(deck.nativeEmoji) \u{AB}\(trans)\u{BB}")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }

@@ -32,10 +32,10 @@ struct CSVImportView: View {
                 List {
                     ForEach(Array(result.items.prefix(10).enumerated()), id: \.offset) { _, entry in
                         HStack {
-                            Text(entry.french)
+                            Text(entry.term)
                                 .fontWeight(.medium)
                             Spacer()
-                            Text(entry.german)
+                            Text(entry.translation)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -90,7 +90,7 @@ struct CSVImportView: View {
         var insertedItems: [VocabItem] = []
 
         for entry in result.items {
-            let item = VocabItem(term: entry.french, translation: entry.german, deck: deck)
+            let item = VocabItem(term: entry.term, translation: entry.translation, deck: deck)
             modelContext.insert(item)
             insertedItems.append(item)
             // Queue term-TTS prefetch immediately (serialized in TTSService)

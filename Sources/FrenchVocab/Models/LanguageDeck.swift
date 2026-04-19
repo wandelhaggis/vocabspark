@@ -25,6 +25,21 @@ final class LanguageDeck {
     var nativeLanguageName: String {
         LanguageCatalog.englishName(for: nativeLanguageCode) ?? "German"
     }
+
+    /// Flag emoji for the native language (for UI).
+    var nativeEmoji: String {
+        LanguageCatalog.emoji(for: nativeLanguageCode) ?? "\u{1F1E9}\u{1F1EA}"
+    }
+
+    /// Localized display name for the native language (for UI).
+    var nativeDisplayName: String {
+        LanguageCatalog.displayName(for: nativeLanguageCode) ?? "Deutsch"
+    }
+
+    /// Formatted label "🇩🇪 Deutsch" for native-language section headers.
+    var nativeLabel: String {
+        "\(nativeEmoji) \(nativeDisplayName)"
+    }
 }
 
 /// Predefined language option for selection UIs.

@@ -65,11 +65,11 @@ struct AddVocabView: View {
                         }
                     }
 
-                    // German field
+                    // Native language field
                     HStack {
-                        Text("\u{1F1E9}\u{1F1EA}")
+                        Text(deck.nativeEmoji)
                             .font(.title3)
-                        TextField("Deutsch", text: $translation)
+                        TextField(deck.nativeDisplayName, text: $translation)
                             .focused($focusedField, equals: .translation)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()

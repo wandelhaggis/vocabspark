@@ -1,7 +1,9 @@
 import Foundation
 
 struct CSVImportResult {
-    let items: [(french: String, german: String)]
+    /// Parsed vocabulary entries. `term` is the foreign-language column (first),
+    /// `translation` is the native-language column (second).
+    let items: [(term: String, translation: String)]
     let skippedLines: Int
 }
 
@@ -44,14 +46,14 @@ enum CSVImportService {
                 continue
             }
 
-            let fr = String(parts[0]).trimmingCharacters(in: .whitespaces)
-            let de = String(parts[1]).trimmingCharacters(in: .whitespaces)
-            guard !fr.isEmpty, !de.isEmpty else {
+            let term = String(parts[0]).trimmingCharacters(in: .whitespaces)
+            let translation = String(parts[1]).trimmingCharacters(in: .whitespaces)
+            guard !term.isEmpty, !translation.isEmpty else {
                 skipped += 1
                 continue
             }
 
-            items.append((fr, de))
+            items.append((term, translation))
         }
 
         return CSVImportResult(items: items, skippedLines: skipped)

@@ -138,7 +138,7 @@ struct VocabTestSessionView: View {
             VStack(spacing: 20) {
                 // Prompt card
                 VStack(spacing: 14) {
-                    Text(isTermPrompt ? "\(deck.emoji) \(deck.name)" : "\u{1F1E9}\u{1F1EA} Deutsch")
+                    Text(isTermPrompt ? "\(deck.emoji) \(deck.name)" : deck.nativeLabel)
                         .font(.caption)
                         .fontWeight(.semibold)
                         .foregroundStyle(.secondary)
@@ -168,7 +168,7 @@ struct VocabTestSessionView: View {
                 // Answer (revealed)
                 if isRevealed {
                     VStack(spacing: 14) {
-                        Text(isTermPrompt ? "\u{1F1E9}\u{1F1EA} Deutsch" : "\(deck.emoji) \(deck.name)")
+                        Text(isTermPrompt ? deck.nativeLabel : "\(deck.emoji) \(deck.name)")
                             .font(.caption)
                             .fontWeight(.semibold)
                             .foregroundStyle(.secondary)

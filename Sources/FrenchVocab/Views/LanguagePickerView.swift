@@ -59,7 +59,9 @@ struct LanguagePickerView: View {
             }
         }
         .confirmationDialog(
-            deckToDelete.map { "\($0.name) l\u{F6}schen?" } ?? "",
+            deckToDelete.map {
+                String(format: String(localized: "%@ l\u{F6}schen?"), $0.displayName)
+            } ?? "",
             isPresented: Binding(
                 get: { deckToDelete != nil },
                 set: { if !$0 { deckToDelete = nil } }
@@ -72,9 +74,11 @@ struct LanguagePickerView: View {
             Button("Abbrechen", role: .cancel) { }
         } message: { deck in
             let count = deckStats[deck.id]?.total ?? 0
-            Text(count > 0
-                 ? "Alle \(count) Vokabeln werden mitgel\u{F6}scht."
-                 : "Diese Sprache wird entfernt.")
+            if count > 0 {
+                Text("Alle \(count) Vokabeln werden mitgel\u{F6}scht.")
+            } else {
+                Text("Diese Sprache wird entfernt.")
+            }
         }
         .onAppear { refreshStats() }
     }
@@ -92,7 +96,7 @@ struct LanguagePickerView: View {
             VStack(spacing: 6) {
                 Text(deck.emoji)
                     .font(.system(size: 44))
-                Text(deck.name)
+                Text(deck.displayName)
                     .font(.headline)
                     .fontDesign(.rounded)
                     .foregroundStyle(.primary)

@@ -138,7 +138,7 @@ struct VocabTestSessionView: View {
             VStack(spacing: 20) {
                 // Prompt card
                 VStack(spacing: 14) {
-                    Text(isTermPrompt ? "\(deck.emoji) \(deck.name)" : deck.nativeLabel)
+                    Text(isTermPrompt ? "\(deck.emoji) \(deck.displayName)" : deck.nativeLabel)
                         .font(.caption)
                         .fontWeight(.semibold)
                         .foregroundStyle(.secondary)
@@ -168,7 +168,7 @@ struct VocabTestSessionView: View {
                 // Answer (revealed)
                 if isRevealed {
                     VStack(spacing: 14) {
-                        Text(isTermPrompt ? deck.nativeLabel : "\(deck.emoji) \(deck.name)")
+                        Text(isTermPrompt ? deck.nativeLabel : "\(deck.emoji) \(deck.displayName)")
                             .font(.caption)
                             .fontWeight(.semibold)
                             .foregroundStyle(.secondary)
@@ -447,7 +447,7 @@ struct VocabTestSessionView: View {
                         .foregroundStyle(.green)
                         .fontWeight(.medium)
                 } else {
-                    Text("\(repeatedCards.count) Vokabel\(repeatedCards.count == 1 ? "" : "n") wiederholt")
+                    Text("\(repeatedCards.count) Vokabeln wiederholt")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }

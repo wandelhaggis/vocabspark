@@ -2,22 +2,30 @@ import SwiftUI
 import SwiftData
 
 enum LearningDirection: String, CaseIterable {
+    // Raw values are internal identifiers only — not displayed.
     case frToDE = "fr→de"
     case deToFR = "de→fr"
     case random = "Zufall"
 
     var icon: String {
         switch self {
-        case .frToDE: return "\u{27A1}\u{FE0F} Abfragen"
-        case .deToFR: return "\u{2B05}\u{FE0F} \u{DC}bersetzen"
-        case .random: return "\u{1F500} Zufall"
+        case .frToDE: return String(localized: "\u{27A1}\u{FE0F} Abfragen", comment: "Direction: foreign→native, short label")
+        case .deToFR: return String(localized: "\u{2B05}\u{FE0F} \u{DC}bersetzen", comment: "Direction: native→foreign, short label")
+        case .random: return String(localized: "\u{1F500} Zufall", comment: "Direction: random order")
         }
     }
 }
 
 enum SessionFilter: String, CaseIterable {
-    case dueOnly = "F\u{E4}llige"
-    case all = "Alle"
+    case dueOnly
+    case all
+
+    var displayName: String {
+        switch self {
+        case .dueOnly: return String(localized: "F\u{E4}llige", comment: "Filter: only cards due for review")
+        case .all:     return String(localized: "Alle", comment: "Filter: all cards")
+        }
+    }
 }
 
 struct SessionSetupView: View {
@@ -145,7 +153,7 @@ struct SessionSetupView: View {
 
                         Picker("Karten", selection: $filter) {
                             ForEach(SessionFilter.allCases, id: \.self) { f in
-                                Text(f.rawValue).tag(f)
+                                Text(f.displayName).tag(f)
                             }
                         }
                         .pickerStyle(.segmented)
@@ -210,8 +218,8 @@ struct SessionSetupView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("\(streakManager.currentStreak) Tage")
                     .font(.system(size: 32, weight: .bold, design: .rounded))
-                Text(streakManager.currentStreak >= streakManager.longestStreak
-                     ? "Bester Streak! \u{1F4AA}" : "Streak")
+                Text(LocalizedStringKey(streakManager.currentStreak >= streakManager.longestStreak
+                     ? "Bester Streak! \u{1F4AA}" : "Streak"))
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundStyle(.secondary)
@@ -235,7 +243,7 @@ struct SessionSetupView: View {
 
 struct StatCard: View {
     let value: Int
-    let label: String
+    let label: LocalizedStringKey
     let icon: String
     let color: Color
 

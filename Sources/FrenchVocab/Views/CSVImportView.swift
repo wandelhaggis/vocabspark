@@ -23,7 +23,7 @@ struct CSVImportView: View {
                     .fontDesign(.rounded)
 
                 if result.skippedLines > 0 {
-                    Text("\(result.skippedLines) Zeile\(result.skippedLines == 1 ? "" : "n") \u{FC}bersprungen")
+                    Text("\(result.skippedLines) Zeilen \u{FC}bersprungen")
                         .font(.caption)
                         .foregroundStyle(.orange)
                 }
@@ -78,7 +78,7 @@ struct CSVImportView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(imported ? "Fertig" : "Abbrechen") { dismiss() }
+                    Button(LocalizedStringKey(imported ? "Fertig" : "Abbrechen")) { dismiss() }
                 }
             }
         }

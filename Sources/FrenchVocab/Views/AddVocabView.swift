@@ -47,7 +47,7 @@ struct AddVocabView: View {
                     HStack {
                         Text(deck.emoji)
                             .font(.title3)
-                        TextField(deck.name, text: $term)
+                        TextField(deck.displayName, text: $term)
                             .focused($focusedField, equals: .term)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
@@ -95,7 +95,7 @@ struct AddVocabView: View {
                 } footer: {
                     if savedCount > 0 {
                         Label(
-                            "\(savedCount) Vokabel\(savedCount == 1 ? "" : "n") gespeichert",
+                            "\(savedCount) Vokabeln gespeichert",
                             systemImage: "checkmark.circle.fill"
                         )
                         .foregroundStyle(.green)

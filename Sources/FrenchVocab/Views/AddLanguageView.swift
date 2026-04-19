@@ -28,7 +28,7 @@ struct AddLanguageView: View {
                                 VStack(spacing: 6) {
                                     Text(lang.emoji)
                                         .font(.system(size: 36))
-                                    Text(lang.name)
+                                    Text(lang.localizedName)
                                         .font(.caption)
                                         .fontWeight(.medium)
                                         .foregroundStyle(.primary)
@@ -57,7 +57,7 @@ struct AddLanguageView: View {
                         Spacer()
                         Picker("Meine Sprache", selection: $nativeCode) {
                             ForEach(LanguageCatalog.nativeCapableLanguages, id: \.code) { lang in
-                                Text("\(lang.emoji) \(lang.name)").tag(lang.code)
+                                Text("\(lang.emoji) \(lang.localizedName)").tag(lang.code)
                             }
                         }
                         .labelsHidden()

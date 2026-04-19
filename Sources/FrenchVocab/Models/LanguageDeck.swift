@@ -21,6 +21,18 @@ final class LanguageDeck {
         self.createdAt = Date()
     }
 
+    /// Localized name of the deck's target (foreign) language, e.g. "Französisch" / "French".
+    /// Use this in UI. The stored `name` is the German key used for localization lookup.
+    var displayName: String {
+        // Look up via the stable English name (ttsLanguage) to find the ISO code,
+        // then return the localized display name for that code.
+        if let code = LanguageCatalog.code(forEnglishName: ttsLanguage),
+           let localized = LanguageCatalog.displayName(for: code) {
+            return localized
+        }
+        return name  // fallback to the stored German name
+    }
+
     /// English name of the native language (for GPT prompts).
     var nativeLanguageName: String {
         LanguageCatalog.englishName(for: nativeLanguageCode) ?? "German"
@@ -45,10 +57,18 @@ final class LanguageDeck {
 /// Predefined language option for selection UIs.
 struct LanguageOption: Identifiable {
     let id = UUID()
-    let name: String          // localized display name (currently only German)
+    /// German display name — also used as the localization key in `Localizable.xcstrings`.
+    let name: String
     let emoji: String
-    let ttsLanguage: String   // English name — stable, for API prompts
-    let code: String          // ISO 639-1 code — stable, for locale matching
+    /// English name — stable, used for API prompts (TTS, GPT).
+    let ttsLanguage: String
+    /// ISO 639-1 code — stable, used for locale matching.
+    let code: String
+
+    /// UI-facing language name, looked up in the String Catalog via the German name as key.
+    var localizedName: String {
+        NSLocalizedString(name, comment: "Language display name")
+    }
 }
 
 /// Central list of supported languages. Used for both target (all 17) and native (15 — Latin excluded).
@@ -82,9 +102,16 @@ enum LanguageCatalog {
         predefinedLanguages.first { $0.code == code }?.ttsLanguage
     }
 
+    /// Reverse lookup: find the ISO code for a given English language name.
+    static func code(forEnglishName englishName: String) -> String? {
+        predefinedLanguages.first { $0.ttsLanguage == englishName }?.code
+    }
+
     /// Returns the localized language name for a given ISO code.
+    /// Looks up the German name in the String Catalog and returns the
+    /// translation for the current locale.
     static func displayName(for code: String) -> String? {
-        predefinedLanguages.first { $0.code == code }?.name
+        predefinedLanguages.first { $0.code == code }?.localizedName
     }
 
     /// Returns the flag emoji for a given ISO code.

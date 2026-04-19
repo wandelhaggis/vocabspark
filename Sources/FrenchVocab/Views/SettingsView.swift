@@ -27,11 +27,11 @@ struct SettingsView: View {
                             .foregroundStyle(isConfigured ? .green : .orange)
                             .font(.title3)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(isConfigured ? "API-Key aktiv" : "API-Key fehlt")
+                            Text(LocalizedStringKey(isConfigured ? "API-Key aktiv" : "API-Key fehlt"))
                                 .fontWeight(.medium)
-                            Text(isConfigured
+                            Text(LocalizedStringKey(isConfigured
                                  ? "Aussprache und Beispiels\u{E4}tze sind aktiv"
-                                 : "Ohne Key keine Aussprache und Beispiels\u{E4}tze")
+                                 : "Ohne Key keine Aussprache und Beispiels\u{E4}tze"))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -141,9 +141,9 @@ struct SettingsView: View {
                             .foregroundStyle(.orange)
                     }
                 } header: {
-                    Text("Import f\u{FC}r \(deck.emoji) \(deck.name)")
+                    Text("Import f\u{FC}r \(deck.emoji) \(deck.displayName)")
                 } footer: {
-                    Text("Importiere eine CSV-/TXT-Datei mit \(deck.name);\(deck.nativeDisplayName) pro Zeile.")
+                    Text("Importiere eine CSV-/TXT-Datei mit \(deck.displayName);\(deck.nativeDisplayName) pro Zeile.")
                 }
             }
             .navigationTitle("Einstellungen")
@@ -165,7 +165,7 @@ struct SettingsView: View {
                 case .success(let urls):
                     guard let url = urls.first else { return }
                     guard url.startAccessingSecurityScopedResource() else {
-                        importError = "Datei konnte nicht gelesen werden"
+                        importError = String(localized: "Datei konnte nicht gelesen werden")
                         return
                     }
                     defer { url.stopAccessingSecurityScopedResource() }
@@ -174,10 +174,10 @@ struct SettingsView: View {
                         importResult = try CSVImportService.parse(data: data)
                         showingImport = true
                     } catch {
-                        importError = "Datei konnte nicht verarbeitet werden"
+                        importError = String(localized: "Datei konnte nicht verarbeitet werden")
                     }
                 case .failure:
-                    importError = "Import abgebrochen"
+                    importError = String(localized: "Import abgebrochen")
                 }
             }
         }

@@ -153,7 +153,7 @@ struct LearningSessionView: View {
             VStack(spacing: 20) {
                 // Prompt card
                 VStack(spacing: 14) {
-                    Text(isTermPrompt ? "\(deck.emoji) \(deck.name)" : deck.nativeLabel)
+                    Text(isTermPrompt ? "\(deck.emoji) \(deck.displayName)" : deck.nativeLabel)
                         .font(.caption)
                         .fontWeight(.semibold)
                         .foregroundStyle(.secondary)
@@ -183,7 +183,7 @@ struct LearningSessionView: View {
                 // Answer card (revealed)
                 if isRevealed {
                     VStack(spacing: 14) {
-                        Text(isTermPrompt ? deck.nativeLabel : "\(deck.emoji) \(deck.name)")
+                        Text(isTermPrompt ? deck.nativeLabel : "\(deck.emoji) \(deck.displayName)")
                             .font(.caption)
                             .fontWeight(.semibold)
                             .foregroundStyle(.secondary)
@@ -489,10 +489,10 @@ struct LearningSessionView: View {
 // MARK: - Rating Button
 
 struct RatingButton: View {
-    let label: String
+    let label: LocalizedStringKey
     let icon: String
     let color: Color
-    let description: String
+    let description: LocalizedStringKey
     let action: () -> Void
 
     var body: some View {
@@ -635,7 +635,7 @@ struct SummaryView: View {
 struct SummaryRow: View {
     let icon: String
     let color: Color
-    let label: String
+    let label: LocalizedStringKey
     let count: Int
     let total: Int
 

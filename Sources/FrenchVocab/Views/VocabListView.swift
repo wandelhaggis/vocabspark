@@ -2,10 +2,19 @@ import SwiftUI
 import SwiftData
 
 enum TimeFilter: String, CaseIterable {
-    case all = "Alle"
-    case today = "Heute"
-    case thisWeek = "Diese Woche"
-    case thisMonth = "Dieser Monat"
+    case all
+    case today
+    case thisWeek
+    case thisMonth
+
+    var displayName: String {
+        switch self {
+        case .all:       return String(localized: "Alle", comment: "Time filter: all vocab")
+        case .today:     return String(localized: "Heute", comment: "Time filter: today only")
+        case .thisWeek:  return String(localized: "Diese Woche", comment: "Time filter: this week")
+        case .thisMonth: return String(localized: "Dieser Monat", comment: "Time filter: this month")
+        }
+    }
 }
 
 struct VocabListView: View {
@@ -71,7 +80,9 @@ struct VocabListView: View {
                     vocabList
                 }
             }
-            .navigationTitle(isTestMode ? "Vokabeltest" : "VocabSpark")
+            .navigationTitle(isTestMode
+                             ? String(localized: "Vokabeltest")
+                             : String(localized: "VocabSpark"))
             .toolbar {
                 if isTestMode {
                     ToolbarItem(placement: .cancellationAction) {
@@ -85,7 +96,7 @@ struct VocabListView: View {
                         // what the user actually sees (after search + time filter).
                         let visibleIDs = Set(filteredItems.map(\.id))
                         let allVisibleSelected = !visibleIDs.isEmpty && visibleIDs.isSubset(of: selectedForTest)
-                        Button(allVisibleSelected ? "Keine" : "Alle") {
+                        Button(LocalizedStringKey(allVisibleSelected ? "Keine" : "Alle")) {
                             if allVisibleSelected {
                                 selectedForTest.subtract(visibleIDs)
                             } else {
@@ -189,7 +200,7 @@ struct VocabListView: View {
                         Image(systemName: "clock.badge.exclamationmark")
                             .font(.title3)
                             .foregroundStyle(.orange)
-                        Text("\(dueCount) Karte\(dueCount == 1 ? "" : "n") f\u{E4}llig")
+                        Text("\(dueCount) Karten f\u{E4}llig")
                             .font(.subheadline)
                             .fontWeight(.semibold)
                             .fontDesign(.rounded)
@@ -208,7 +219,7 @@ struct VocabListView: View {
                                         timeFilter = filter
                                     }
                                 } label: {
-                                    Text(filter.rawValue)
+                                    Text(filter.displayName)
                                         .font(.subheadline)
                                         .fontWeight(timeFilter == filter ? .semibold : .regular)
                                         .padding(.horizontal, 14)
@@ -224,7 +235,9 @@ struct VocabListView: View {
                 }
             }
 
-            Section(isTestMode ? "Vokabeln ausw\u{E4}hlen" : "\(timeFilter == .all ? "Alle Vokabeln" : timeFilter.rawValue) (\(filteredItems.count))") {
+            Section(isTestMode
+                    ? String(localized: "Vokabeln ausw\u{E4}hlen")
+                    : "\(timeFilter == .all ? String(localized: "Alle Vokabeln") : timeFilter.displayName) (\(filteredItems.count))") {
                 ForEach(filteredItems) { item in
                     if isTestMode {
                         testRow(item: item)

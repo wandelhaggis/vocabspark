@@ -1,0 +1,1770 @@
+{
+  "sourceLanguage": "de",
+  "strings": {
+    "Abbrechen": {
+      "comment": "LanguagePickerView.swift:72, AddLanguageView.swift:73, VocabListView.swift:78, EditVocabView.swift:132, AddVocabView (via unsaved alert context), CSVImportView.swift:81, SettingsView (import error)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abbrechen"
+          }
+        }
+      }
+    },
+    "Alle": {
+      "comment": "VocabListView.swift:7 (TimeFilter.all), VocabListView.swift:88 (toolbar), SessionSetupView.swift:21 (SessionFilter.all)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle"
+          }
+        }
+      }
+    },
+    "Alle importieren": {
+      "comment": "CSVImportView.swift:60",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle importieren"
+          }
+        }
+      }
+    },
+    "Alle Vokabeln": {
+      "comment": "VocabListView.swift:227",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle Vokabeln"
+          }
+        }
+      }
+    },
+    "Alles beim ersten Mal!": {
+      "comment": "VocabTestSessionView.swift:445",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles beim ersten Mal!"
+          }
+        }
+      }
+    },
+    "Alles geschafft!": {
+      "comment": "VocabTestSessionView.swift:432",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles geschafft!"
+          }
+        }
+      }
+    },
+    "Anhören": {
+      "comment": "LearningSessionView.swift:343, VocabTestSessionView.swift:353",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anhören"
+          }
+        }
+      }
+    },
+    "API-Key aktiv": {
+      "comment": "SettingsView.swift:30",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API-Key aktiv"
+          }
+        }
+      }
+    },
+    "API-Key fehlt": {
+      "comment": "SettingsView.swift:30",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API-Key fehlt"
+          }
+        }
+      }
+    },
+    "Aufdecken": {
+      "comment": "LearningSessionView.swift:240, VocabTestSessionView.swift:224",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aufdecken"
+          }
+        }
+      }
+    },
+    "Aus Zwischenablage einfügen": {
+      "comment": "SettingsView.swift:54",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus Zwischenablage einfügen"
+          }
+        }
+      }
+    },
+    "Aussprache nicht verfügbar": {
+      "comment": "TTSService.swift:106",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aussprache nicht verfügbar"
+          }
+        }
+      }
+    },
+    "Aussprache und Beispielsätze sind aktiv": {
+      "comment": "SettingsView.swift:33",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aussprache und Beispielsätze sind aktiv"
+          }
+        }
+      }
+    },
+    "Bearbeiten": {
+      "comment": "EditVocabView.swift:128",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bearbeiten"
+          }
+        }
+      }
+    },
+    "Beenden": {
+      "comment": "LearningSessionView.swift:136, VocabTestSessionView.swift:116",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beenden"
+          }
+        }
+      }
+    },
+    "Beispiel laden": {
+      "comment": "EditVocabView.swift:106",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beispiel laden"
+          }
+        }
+      }
+    },
+    "Beispielsatz": {
+      "comment": "EditVocabView.swift:84, EditVocabView.swift:94",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beispielsatz"
+          }
+        }
+      }
+    },
+    "Bekannt": {
+      "comment": "ProgressChartView.swift:117, 130 (chart value label); also VocabCategory.bekannt (status label)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bekannt"
+          }
+        }
+      }
+    },
+    "Bekannt im Verlauf": {
+      "comment": "ProgressChartView.swift:100",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bekannt im Verlauf"
+          }
+        }
+      }
+    },
+    "Bester Streak! 💪": {
+      "comment": "SessionSetupView.swift:214",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bester Streak! 💪"
+          }
+        }
+      }
+    },
+    "CSV Import": {
+      "comment": "CSVImportView.swift:77",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CSV Import"
+          }
+        }
+      }
+    },
+    "Datei konnte nicht gelesen werden": {
+      "comment": "SettingsView.swift:168",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datei konnte nicht gelesen werden"
+          }
+        }
+      }
+    },
+    "Datei konnte nicht verarbeitet werden": {
+      "comment": "SettingsView.swift:177",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datei konnte nicht verarbeitet werden"
+          }
+        }
+      }
+    },
+    "Die aktuell eingegebene Vokabel wird nicht gespeichert.": {
+      "comment": "AddVocabView.swift:139",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die aktuell eingegebene Vokabel wird nicht gespeichert."
+          }
+        }
+      }
+    },
+    "Die Datei konnte nicht gelesen werden.": {
+      "comment": "CSVImportService.swift:64",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Datei konnte nicht gelesen werden."
+          }
+        }
+      }
+    },
+    "Diese Sprache wird entfernt.": {
+      "comment": "LanguagePickerView.swift:77",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Sprache wird entfernt."
+          }
+        }
+      }
+    },
+    "Diese Woche": {
+      "comment": "VocabListView.swift:7 (TimeFilter.thisWeek), SessionSetupView.swift:101",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Woche"
+          }
+        }
+      }
+    },
+    "Dieser Monat": {
+      "comment": "VocabListView.swift:8 (TimeFilter.thisMonth)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieser Monat"
+          }
+        }
+      }
+    },
+    "Du bekommst jeden Tag zur gewählten Uhrzeit eine Erinnerung.": {
+      "comment": "SettingsView.swift:128",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du bekommst jeden Tag zur gewählten Uhrzeit eine Erinnerung."
+          }
+        }
+      }
+    },
+    "Einstellungen": {
+      "comment": "ContentView.swift:33, SettingsView.swift:149",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einstellungen"
+          }
+        }
+      }
+    },
+    "Erinnerung": {
+      "comment": "SettingsView.swift:126",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erinnerung"
+          }
+        }
+      }
+    },
+    "Erste Vokabel hinzufügen": {
+      "comment": "VocabListView.swift:167",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erste Vokabel hinzufügen"
+          }
+        }
+      }
+    },
+    "Fällig": {
+      "comment": "SessionSetupView.swift:99",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fällig"
+          }
+        }
+      }
+    },
+    "Fällige": {
+      "comment": "SessionSetupView.swift:20 (SessionFilter.dueOnly)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fällige"
+          }
+        }
+      }
+    },
+    "Fast": {
+      "comment": "LearningSessionView.swift:365, LearningSessionView.swift:562 (SummaryRow label)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fast"
+          }
+        }
+      }
+    },
+    "Fertig": {
+      "comment": "AddVocabView.swift:125, VocabTestSessionView.swift:464, CSVImportView.swift:81 (after import), LearningSessionView.swift:374 (RatingButton description)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fertig"
+          }
+        }
+      }
+    },
+    "Füge eine Sprache hinzu, um loszulegen.": {
+      "comment": "LanguagePickerView.swift:27",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Füge eine Sprache hinzu, um loszulegen."
+          }
+        }
+      }
+    },
+    "Füge zuerst Vokabeln im Tab\n«Vokabeln» hinzu!": {
+      "comment": "SessionSetupView.swift:78",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Füge zuerst Vokabeln im Tab\n«Vokabeln» hinzu!"
+          }
+        }
+      }
+    },
+    "Für Aussprache und Beispielsätze brauchst du einen OpenAI API-Key. Du kannst ihn in den Einstellungen eingeben.": {
+      "comment": "ContentView.swift:52",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für Aussprache und Beispielsätze brauchst du einen OpenAI API-Key. Du kannst ihn in den Einstellungen eingeben."
+          }
+        }
+      }
+    },
+    "Gelernt pro Tag": {
+      "comment": "ProgressChartView.swift:157",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gelernt pro Tag"
+          }
+        }
+      }
+    },
+    "Geschafft!": {
+      "comment": "LearningSessionView.swift:554",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geschafft!"
+          }
+        }
+      }
+    },
+    "Gesamt": {
+      "comment": "SessionSetupView.swift:98",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gesamt"
+          }
+        }
+      }
+    },
+    "Gespeichert!": {
+      "comment": "SettingsView.swift:75",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gespeichert!"
+          }
+        }
+      }
+    },
+    "Gewusst": {
+      "comment": "LearningSessionView.swift:561 (SummaryRow label), ProgressChartView.swift:174 (chart value label)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gewusst"
+          }
+        }
+      }
+    },
+    "Gewusst!": {
+      "comment": "LearningSessionView.swift:372",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gewusst!"
+          }
+        }
+      }
+    },
+    "Heute": {
+      "comment": "VocabListView.swift:6 (TimeFilter.today)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute"
+          }
+        }
+      }
+    },
+    "Hol dir einen Key unter platform.openai.com/api-keys\nDer Key bleibt nur auf diesem Gerät gespeichert.": {
+      "comment": "SettingsView.swift:93",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hol dir einen Key unter platform.openai.com/api-keys\nDer Key bleibt nur auf diesem Gerät gespeichert."
+          }
+        }
+      }
+    },
+    "Import abgebrochen": {
+      "comment": "SettingsView.swift:180",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import abgebrochen"
+          }
+        }
+      }
+    },
+    "Importiert!": {
+      "comment": "CSVImportView.swift:50",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importiert!"
+          }
+        }
+      }
+    },
+    "Kann ich!": {
+      "comment": "VocabTestSessionView.swift:306",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kann ich!"
+          }
+        }
+      }
+    },
+    "Karten": {
+      "comment": "SessionSetupView.swift:141, SessionSetupView.swift:146 (Picker title)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karten"
+          }
+        }
+      }
+    },
+    "Kategorie": {
+      "comment": "EditVocabView.swift:65, EditVocabView.swift:72",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kategorie"
+          }
+        }
+      }
+    },
+    "Keine": {
+      "comment": "VocabListView.swift:88 (toolbar toggle)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine"
+          }
+        }
+      }
+    },
+    "Keine Internetverbindung": {
+      "comment": "TTSService.swift:104",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Internetverbindung"
+          }
+        }
+      }
+    },
+    "Key entfernen": {
+      "comment": "SettingsView.swift:87",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Key entfernen"
+          }
+        }
+      }
+    },
+    "Lernen": {
+      "comment": "ContentView.swift:21; also VocabCategory.lernen (status label)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lernen"
+          }
+        }
+      }
+    },
+    "Lernsession": {
+      "comment": "SessionSetupView.swift:84, SessionSetupView.swift:190",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lernsession"
+          }
+        }
+      }
+    },
+    "Löschen": {
+      "comment": "LanguagePickerView: destructive delete action",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Löschen"
+          }
+        }
+      }
+    },
+    "Meine Sprache": {
+      "comment": "AddLanguageView.swift:54, AddLanguageView.swift:58 (Picker title)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meine Sprache"
+          }
+        }
+      }
+    },
+    "Neue Vokabel": {
+      "comment": "AddVocabView.swift:94",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neue Vokabel"
+          }
+        }
+      }
+    },
+    "Neuer Rekord! 💪": {
+      "comment": "LearningSessionView.swift:581",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neuer Rekord! 💪"
+          }
+        }
+      }
+    },
+    "Nicht gespeicherte Eingabe?": {
+      "comment": "AddVocabView.swift:135",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht gespeicherte Eingabe?"
+          }
+        }
+      }
+    },
+    "Noch keine Vokabeln": {
+      "comment": "VocabListView.swift:157",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch keine Vokabeln"
+          }
+        }
+      }
+    },
+    "Noch nichts zum Lernen": {
+      "comment": "SessionSetupView.swift:74",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch nichts zum Lernen"
+          }
+        }
+      }
+    },
+    "Nochmal": {
+      "comment": "LearningSessionView.swift:358, LearningSessionView.swift:563, VocabTestSessionView.swift:288",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nochmal"
+          }
+        }
+      }
+    },
+    "Ohne Key keine Aussprache und Beispielsätze": {
+      "comment": "SettingsView.swift:34",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohne Key keine Aussprache und Beispielsätze"
+          }
+        }
+      }
+    },
+    "OpenAI API-Key": {
+      "comment": "SettingsView.swift:91",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenAI API-Key"
+          }
+        }
+      }
+    },
+    "Richtung": {
+      "comment": "SessionSetupView.swift:113",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Richtung"
+          }
+        }
+      }
+    },
+    "Setzt den Lernfortschritt zurück": {
+      "comment": "EditVocabView.swift:76",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Setzt den Lernfortschritt zurück"
+          }
+        }
+      }
+    },
+    "Sofort": {
+      "comment": "LearningSessionView.swift:361 (RatingButton description)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sofort"
+          }
+        }
+      }
+    },
+    "Später": {
+      "comment": "LearningSessionView.swift:368 (RatingButton description), ContentView.swift:48 (button)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Später"
+          }
+        }
+      }
+    },
+    "Speichern": {
+      "comment": "EditVocabView.swift:119, SettingsView.swift:66",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speichern"
+          }
+        }
+      }
+    },
+    "Speichern & nächste": {
+      "comment": "AddVocabView.swift:112",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speichern & nächste"
+          }
+        }
+      }
+    },
+    "Sprache hinzufügen": {
+      "comment": "LanguagePickerView.swift:42",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprache hinzufügen"
+          }
+        }
+      }
+    },
+    "Sprache wählen": {
+      "comment": "AddLanguageView.swift:69",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprache wählen"
+          }
+        }
+      }
+    },
+    "Status": {
+      "comment": "SettingsView.swift:24",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status"
+          }
+        }
+      }
+    },
+    "Streak": {
+      "comment": "SessionSetupView.swift:214",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Streak"
+          }
+        }
+      }
+    },
+    "Suchen...": {
+      "comment": "VocabListView.swift:252 (searchable prompt)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suchen..."
+          }
+        }
+      }
+    },
+    "Tag": {
+      "comment": "ProgressChartView.swift:116, 129, 173 (chart value label)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tag"
+          }
+        }
+      }
+    },
+    "Tägliche Erinnerung": {
+      "comment": "SettingsView.swift:98",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tägliche Erinnerung"
+          }
+        }
+      }
+    },
+    "Tippe auf + um loszulegen!": {
+      "comment": "VocabListView.swift:161",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tippe auf + um loszulegen!"
+          }
+        }
+      }
+    },
+    "Uhrzeit": {
+      "comment": "SettingsView.swift:118 (DatePicker label)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uhrzeit"
+          }
+        }
+      }
+    },
+    "Verwerfen": {
+      "comment": "AddVocabView.swift:136",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verwerfen"
+          }
+        }
+      }
+    },
+    "VocabSpark": {
+      "comment": "VocabListView.swift:74 (navigationTitle)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VocabSpark"
+          }
+        }
+      }
+    },
+    "Vokabel bearbeiten": {
+      "comment": "EditVocabView.swift:40",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vokabel bearbeiten"
+          }
+        }
+      }
+    },
+    "Vokabel hinzufügen": {
+      "comment": "AddVocabView.swift:121",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vokabel hinzufügen"
+          }
+        }
+      }
+    },
+    "Vokabelliste importieren": {
+      "comment": "SettingsView.swift:136",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vokabelliste importieren"
+          }
+        }
+      }
+    },
+    "Vokabeln": {
+      "comment": "ContentView.swift:27",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vokabeln"
+          }
+        }
+      }
+    },
+    "Vokabeln auswählen": {
+      "comment": "VocabListView.swift:227",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vokabeln auswählen"
+          }
+        }
+      }
+    },
+    "Vokabeltest": {
+      "comment": "VocabListView.swift:74 (navigationTitle when in test mode)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vokabeltest"
+          }
+        }
+      }
+    },
+    "Was möchtest du\nheute lernen?": {
+      "comment": "LanguagePickerView.swift:21",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Was möchtest du\nheute lernen?"
+          }
+        }
+      }
+    },
+    "Weiter": {
+      "comment": "LearningSessionView.swift:604",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weiter"
+          }
+        }
+      }
+    },
+    "Welche Sprache möchtest du lernen?": {
+      "comment": "AddLanguageView.swift:16",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welche Sprache möchtest du lernen?"
+          }
+        }
+      }
+    },
+    "Willkommen bei VocabSpark!": {
+      "comment": "ContentView.swift:43",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Willkommen bei VocabSpark!"
+          }
+        }
+      }
+    },
+    "Wird geladen...": {
+      "comment": "EditVocabView.swift:98",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird geladen..."
+          }
+        }
+      }
+    },
+    "Zu den Einstellungen": {
+      "comment": "ContentView.swift:44",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zu den Einstellungen"
+          }
+        }
+      }
+    },
+    "Zurück": {
+      "comment": "AddVocabView.swift:137",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zurück"
+          }
+        }
+      }
+    },
+    "% Gewusst": {
+      "comment": "SessionSetupView.swift:102",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "% Gewusst"
+          }
+        }
+      }
+    },
+    "Deutsch": {
+      "comment": "Language display name: German",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deutsch"
+          }
+        }
+      }
+    },
+    "Englisch": {
+      "comment": "Language display name: English",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Englisch"
+          }
+        }
+      }
+    },
+    "Französisch": {
+      "comment": "Language display name: French",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Französisch"
+          }
+        }
+      }
+    },
+    "Spanisch": {
+      "comment": "Language display name: Spanish",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spanisch"
+          }
+        }
+      }
+    },
+    "Italienisch": {
+      "comment": "Language display name: Italian",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Italienisch"
+          }
+        }
+      }
+    },
+    "Portugiesisch": {
+      "comment": "Language display name: Portuguese",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Portugiesisch"
+          }
+        }
+      }
+    },
+    "Niederländisch": {
+      "comment": "Language display name: Dutch",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niederländisch"
+          }
+        }
+      }
+    },
+    "Schwedisch": {
+      "comment": "Language display name: Swedish",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schwedisch"
+          }
+        }
+      }
+    },
+    "Polnisch": {
+      "comment": "Language display name: Polish",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Polnisch"
+          }
+        }
+      }
+    },
+    "Russisch": {
+      "comment": "Language display name: Russian",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Russisch"
+          }
+        }
+      }
+    },
+    "Türkisch": {
+      "comment": "Language display name: Turkish",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Türkisch"
+          }
+        }
+      }
+    },
+    "Griechisch": {
+      "comment": "Language display name: Greek",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Griechisch"
+          }
+        }
+      }
+    },
+    "Japanisch": {
+      "comment": "Language display name: Japanese",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Japanisch"
+          }
+        }
+      }
+    },
+    "Koreanisch": {
+      "comment": "Language display name: Korean",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koreanisch"
+          }
+        }
+      }
+    },
+    "Chinesisch": {
+      "comment": "Language display name: Chinese",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chinesisch"
+          }
+        }
+      }
+    },
+    "Arabisch": {
+      "comment": "Language display name: Arabic",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arabisch"
+          }
+        }
+      }
+    },
+    "Latein": {
+      "comment": "Language display name: Latin",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Latein"
+          }
+        }
+      }
+    },
+    "Neu": {
+      "comment": "Vocab status: fresh/new card (VocabCategory.neu)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neu"
+          }
+        }
+      }
+    },
+    "Festigen": {
+      "comment": "Vocab status: reinforcing (VocabCategory.festigen)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Festigen"
+          }
+        }
+      }
+    },
+    "➡️ Abfragen": {
+      "comment": "Direction: foreign → native (learning direction short label)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "➡️ Abfragen"
+          }
+        }
+      }
+    },
+    "⬅️ Übersetzen": {
+      "comment": "Direction: native → foreign (learning direction short label)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⬅️ Übersetzen"
+          }
+        }
+      }
+    },
+    "🔀 Zufall": {
+      "comment": "Direction: random order (learning direction short label)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🔀 Zufall"
+          }
+        }
+      }
+    },
+    "Zeit zum Lernen! 📚": {
+      "comment": "Daily reminder notification title",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeit zum Lernen! 📚"
+          }
+        }
+      }
+    },
+    "Deine Vokabeln warten. Nur 5 Minuten!": {
+      "comment": "Daily reminder notification body",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deine Vokabeln warten. Nur 5 Minuten!"
+          }
+        }
+      }
+    },
+    "%lld Karten fällig": {
+      "comment": "Vocabulary list: due cards count (plural)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Karte fällig"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Karten fällig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld Vokabeln gespeichert": {
+      "comment": "AddVocabView: saved vocab counter (plural)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Vokabel gespeichert"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Vokabeln gespeichert"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld Vokabeln wiederholt": {
+      "comment": "VocabTestSessionView summary: repeated cards (plural)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Vokabel wiederholt"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Vokabeln wiederholt"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld Zeilen übersprungen": {
+      "comment": "CSVImportView: skipped lines (plural)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Zeile übersprungen"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Zeilen übersprungen"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%@ löschen?": {
+      "comment": "LanguagePickerView: delete deck confirmation",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ löschen?"
+          }
+        }
+      }
+    },
+    "Alle %lld Vokabeln werden mitgelöscht.": {
+      "comment": "LanguagePickerView: delete confirmation with count",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle %lld Vokabeln werden mitgelöscht."
+          }
+        }
+      }
+    },
+    "%lld Wörter · %lld gelernt": {
+      "comment": "LanguagePickerView: deck stats",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Wörter · %lld gelernt"
+          }
+        }
+      }
+    },
+    "Los geht's! (%lld Karten)": {
+      "comment": "SessionSetupView: start button",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los geht's! (%lld Karten)"
+          }
+        }
+      }
+    },
+    "%lld Tage": {
+      "comment": "SessionSetupView: streak days (plural)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Tag"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Tage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld Tage Streak": {
+      "comment": "LearningSessionView summary: streak (plural)",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Tag Streak"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Tage Streak"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld von %lld": {
+      "comment": "Progress counter: N of M",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld von %lld"
+          }
+        }
+      }
+    },
+    "· %lld wiederholt": {
+      "comment": "VocabTestSessionView top bar: repeated counter",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· %lld wiederholt"
+          }
+        }
+      }
+    },
+    "%lld Vokabeln gemeistert": {
+      "comment": "VocabTestSessionView summary: mastered count",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Vokabeln gemeistert"
+          }
+        }
+      }
+    },
+    "%lld Vokabeln gefunden": {
+      "comment": "CSVImportView: found vocab count",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Vokabeln gefunden"
+          }
+        }
+      }
+    },
+    "%lld Vokabeln testen": {
+      "comment": "VocabListView: start test button",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Vokabeln testen"
+          }
+        }
+      }
+    },
+    "... und %lld weitere": {
+      "comment": "CSVImportView: preview overflow",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "... und %lld weitere"
+          }
+        }
+      }
+    },
+    "Import für %@ %@": {
+      "comment": "SettingsView: import section header with deck emoji+name",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import für %@ %@"
+          }
+        }
+      }
+    },
+    "Importiere eine CSV-/TXT-Datei mit %@;%@ pro Zeile.": {
+      "comment": "SettingsView: CSV import hint with target;native language names",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importiere eine CSV-/TXT-Datei mit %@;%@ pro Zeile."
+          }
+        }
+      }
+    },
+    "30 Tage": {
+      "comment": "ProgressChartView: chart range label",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 Tage"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

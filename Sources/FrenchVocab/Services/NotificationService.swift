@@ -35,8 +35,8 @@ class NotificationService {
         center.removePendingNotificationRequests(withIdentifiers: [dailyID])
 
         let content = UNMutableNotificationContent()
-        content.title = "Zeit zum Lernen! \u{1F4DA}"
-        content.body = "Deine Vokabeln warten. Nur 5 Minuten!"
+        content.title = String(localized: "Zeit zum Lernen! \u{1F4DA}", comment: "Daily reminder notification title")
+        content.body = String(localized: "Deine Vokabeln warten. Nur 5 Minuten!", comment: "Daily reminder notification body")
         content.sound = .default
 
         var when = DateComponents()

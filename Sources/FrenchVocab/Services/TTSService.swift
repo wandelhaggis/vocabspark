@@ -101,9 +101,9 @@ class TTSService: ObservableObject {
         } catch is CancellationError {
             // Task was cancelled, ignore silently
         } catch let urlError as URLError where urlError.code == .notConnectedToInternet || urlError.code == .networkConnectionLost || urlError.code == .timedOut {
-            errorMessage = "Keine Internetverbindung"
+            errorMessage = String(localized: "Keine Internetverbindung")
         } catch {
-            errorMessage = "Aussprache nicht verfügbar"
+            errorMessage = String(localized: "Aussprache nicht verfügbar")
         }
     }
 

@@ -61,6 +61,6 @@ enum CSVImportService {
 
     enum CSVError: LocalizedError {
         case invalidEncoding
-        var errorDescription: String? { "Die Datei konnte nicht gelesen werden." }
+        var errorDescription: String? { String(localized: "Die Datei konnte nicht gelesen werden.") }
     }
 }

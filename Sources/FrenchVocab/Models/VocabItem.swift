@@ -2,10 +2,21 @@ import Foundation
 import SwiftData
 
 enum VocabCategory: String, CaseIterable {
+    // Raw values are persisted in MasteryEvent — do NOT change them.
+    // Use `displayName` for user-facing text instead.
     case neu = "Neu"
     case lernen = "Lernen"
     case festigen = "Festigen"
     case bekannt = "Bekannt"
+
+    var displayName: String {
+        switch self {
+        case .neu:      return String(localized: "Neu", comment: "Vocab status: fresh/new card")
+        case .lernen:   return String(localized: "Lernen", comment: "Vocab status: currently learning")
+        case .festigen: return String(localized: "Festigen", comment: "Vocab status: reinforcing")
+        case .bekannt:  return String(localized: "Bekannt", comment: "Vocab status: known well")
+        }
+    }
 }
 
 @Model
@@ -55,7 +66,7 @@ final class VocabItem {
         return .bekannt
     }
 
-    var statusLabel: String { category.rawValue }
+    var statusLabel: String { category.displayName }
 
     func applyCategory(_ cat: VocabCategory) {
         // Fix #18: normalize nextReviewDate to start-of-day — matches SRSEngine behavior

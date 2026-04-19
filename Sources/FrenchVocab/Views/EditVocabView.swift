@@ -41,7 +41,7 @@ struct EditVocabView: View {
                     HStack {
                         Text(deck.emoji)
                             .font(.title3)
-                        TextField(deck.name, text: $term)
+                        TextField(deck.displayName, text: $term)
                             .focused($focusedField, equals: .term)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
@@ -64,7 +64,7 @@ struct EditVocabView: View {
                 Section {
                     Picker("Kategorie", selection: $selectedCategory) {
                         ForEach(VocabCategory.allCases, id: \.self) { cat in
-                            Text(cat.rawValue).tag(cat)
+                            Text(cat.displayName).tag(cat)
                         }
                     }
                     .pickerStyle(.segmented)

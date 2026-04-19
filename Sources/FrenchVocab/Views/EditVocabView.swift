@@ -155,24 +155,30 @@ struct EditVocabView: View {
             ))
         }
         // Re-fetch example if words changed or none exists
+        let targetLang = deck.ttsLanguage
+        let nativeLang = deck.nativeLanguageName
         if wordsChanged {
             // Word changed — prefetch new TTS immediately, then refresh example + its TTS
-            TTSService.shared.prefetch(item.term, language: deck.ttsLanguage)
-            let language = deck.ttsLanguage
-            let deckName = deck.name
+            TTSService.shared.prefetch(item.term, language: targetLang)
             Task {
-                await ExampleSentenceService.shared.refetchExample(for: item, languageName: deckName)
+                await ExampleSentenceService.shared.refetchExample(
+                    for: item,
+                    targetLanguage: targetLang,
+                    nativeLanguage: nativeLang
+                )
                 if let example = item.exampleSentence {
-                    TTSService.shared.prefetch(example, language: language)
+                    TTSService.shared.prefetch(example, language: targetLang)
                 }
             }
         } else if item.exampleSentence == nil {
-            let language = deck.ttsLanguage
-            let deckName = deck.name
             Task {
-                await ExampleSentenceService.shared.fetchExample(for: item, languageName: deckName)
+                await ExampleSentenceService.shared.fetchExample(
+                    for: item,
+                    targetLanguage: targetLang,
+                    nativeLanguage: nativeLang
+                )
                 if let example = item.exampleSentence {
-                    TTSService.shared.prefetch(example, language: language)
+                    TTSService.shared.prefetch(example, language: targetLang)
                 }
             }
         }
@@ -181,12 +187,16 @@ struct EditVocabView: View {
 
     private func loadExample() {
         isLoadingExample = true
-        let language = deck.ttsLanguage
-        let deckName = deck.name
+        let targetLang = deck.ttsLanguage
+        let nativeLang = deck.nativeLanguageName
         Task {
-            await ExampleSentenceService.shared.fetchExample(for: item, languageName: deckName)
+            await ExampleSentenceService.shared.fetchExample(
+                for: item,
+                targetLanguage: targetLang,
+                nativeLanguage: nativeLang
+            )
             if let example = item.exampleSentence {
-                TTSService.shared.prefetch(example, language: language)
+                TTSService.shared.prefetch(example, language: targetLang)
             }
             isLoadingExample = false
         }

@@ -85,8 +85,8 @@ struct CSVImportView: View {
     }
 
     private func importAll() {
-        let language = deck.ttsLanguage
-        let deckName = deck.name
+        let targetLang = deck.ttsLanguage
+        let nativeLang = deck.nativeLanguageName
         var insertedItems: [VocabItem] = []
 
         for entry in result.items {
@@ -94,16 +94,20 @@ struct CSVImportView: View {
             modelContext.insert(item)
             insertedItems.append(item)
             // Queue term-TTS prefetch immediately (serialized in TTSService)
-            TTSService.shared.prefetch(item.term, language: language)
+            TTSService.shared.prefetch(item.term, language: targetLang)
         }
 
         // Background: fetch example sentences + prefetch their TTS sequentially
         // Serialized via ExampleSentenceService + TTSService internal queues.
         Task {
             for item in insertedItems {
-                await ExampleSentenceService.shared.fetchExample(for: item, languageName: deckName)
+                await ExampleSentenceService.shared.fetchExample(
+                    for: item,
+                    targetLanguage: targetLang,
+                    nativeLanguage: nativeLang
+                )
                 if let example = item.exampleSentence {
-                    TTSService.shared.prefetch(example, language: language)
+                    TTSService.shared.prefetch(example, language: targetLang)
                 }
             }
         }

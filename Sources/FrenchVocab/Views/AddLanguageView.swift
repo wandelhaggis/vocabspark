@@ -6,6 +6,9 @@ struct AddLanguageView: View {
     @Environment(\.dismiss) private var dismiss
     let onCreated: (LanguageDeck) -> Void
 
+    /// Native language defaults to the device locale, falls back to German.
+    @State private var nativeCode: String = LanguageCatalog.defaultNativeLanguageCode
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -16,6 +19,7 @@ struct AddLanguageView: View {
                         .fontDesign(.rounded)
                         .padding(.top)
 
+                    // Target language grid
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                         ForEach(predefinedLanguages) { lang in
                             Button {
@@ -35,9 +39,31 @@ struct AddLanguageView: View {
                                 .background(Color(.systemGray6))
                                 .clipShape(RoundedRectangle(cornerRadius: 14))
                             }
+                            // Users shouldn't target a deck in their own native language
+                            .disabled(lang.code == nativeCode)
+                            .opacity(lang.code == nativeCode ? 0.35 : 1)
                         }
                     }
                     .padding(.horizontal)
+
+                    Divider()
+                        .padding(.horizontal, 40)
+
+                    // Native language picker
+                    HStack {
+                        Text("Meine Sprache")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Spacer()
+                        Picker("Meine Sprache", selection: $nativeCode) {
+                            ForEach(LanguageCatalog.nativeCapableLanguages, id: \.code) { lang in
+                                Text("\(lang.emoji) \(lang.name)").tag(lang.code)
+                            }
+                        }
+                        .labelsHidden()
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
                 }
             }
             .navigationTitle("Sprache w\u{E4}hlen")
@@ -51,7 +77,12 @@ struct AddLanguageView: View {
     }
 
     private func createDeck(_ lang: LanguageOption) {
-        let deck = LanguageDeck(name: lang.name, emoji: lang.emoji, ttsLanguage: lang.ttsLanguage)
+        let deck = LanguageDeck(
+            name: lang.name,
+            emoji: lang.emoji,
+            ttsLanguage: lang.ttsLanguage,
+            nativeLanguageCode: nativeCode
+        )
         modelContext.insert(deck)
         HapticService.success()
         dismiss()

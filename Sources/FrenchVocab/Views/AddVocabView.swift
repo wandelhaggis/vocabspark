@@ -150,12 +150,17 @@ struct AddVocabView: View {
     /// 3. Once example is ready, prefetch its TTS too
     private func prefetchAudioAndExample(for item: VocabItem) {
         let language = deck.ttsLanguage
-        let deckName = deck.name
+        let targetLang = deck.ttsLanguage
+        let nativeLang = deck.nativeLanguageName
         // Start term-TTS download immediately
         TTSService.shared.prefetch(item.term, language: language)
         // Example sentence + its TTS run sequentially in the background
         Task {
-            await ExampleSentenceService.shared.fetchExample(for: item, languageName: deckName)
+            await ExampleSentenceService.shared.fetchExample(
+                for: item,
+                targetLanguage: targetLang,
+                nativeLanguage: nativeLang
+            )
             if let example = item.exampleSentence {
                 TTSService.shared.prefetch(example, language: language)
             }
@@ -166,12 +171,15 @@ struct AddVocabView: View {
         let sourceText = fromForeign ? term : translation
         guard !sourceText.trimmingCharacters(in: .whitespaces).isEmpty else { return }
 
+        let source = fromForeign ? deck.ttsLanguage : deck.nativeLanguageName
+        let destination = fromForeign ? deck.nativeLanguageName : deck.ttsLanguage
+
         isTranslating = true
         Task {
             if let result = await ExampleSentenceService.shared.translate(
                 word: sourceText,
-                languageName: deck.name,
-                fromForeign: fromForeign
+                from: source,
+                to: destination
             ) {
                 if fromForeign {
                     translation = result

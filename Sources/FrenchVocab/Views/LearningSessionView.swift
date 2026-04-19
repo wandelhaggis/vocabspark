@@ -1,4 +1,5 @@
 import SwiftUI
+import StoreKit
 
 struct LearningSessionView: View {
     let items: [VocabItem]
@@ -27,6 +28,8 @@ struct LearningSessionView: View {
     @State private var isAdvancing = false
     /// Fix #19: hold the flash-advance task so we can cancel on dismiss.
     @State private var advanceTask: Task<Void, Never>?
+    /// Total completed sessions — used to throttle review prompt.
+    @AppStorage("completedSessionCount") private var completedSessionCount = 0
     /// Fix #4: prevent saveSession from running twice.
     @State private var sessionSaved = false
     @State private var showingSummary = false
@@ -471,6 +474,7 @@ struct LearningSessionView: View {
         )
         modelContext.insert(record)
         streakManager.recordSession(cardCount: sessionResults.count)
+        completedSessionCount += 1
     }
 
     private func resolveDirection() {
@@ -522,10 +526,25 @@ struct SummaryView: View {
     let onDone: () -> Void
 
     @ObservedObject private var streakManager = StreakManager.shared
+    @Environment(\.requestReview) private var requestReview
+
+    @AppStorage("completedSessionCount") private var completedSessionCount = 0
+    @AppStorage("lastReviewPromptTS") private var lastReviewPromptTS: Double = 0
 
     var againCount: Int { results.filter { $0 == .again }.count }
     var hardCount: Int { results.filter { $0 == .hard }.count }
     var goodCount: Int { results.filter { $0 == .good }.count }
+
+    private var shouldPromptReview: Bool {
+        // Need at least 5 completed sessions in total
+        guard completedSessionCount >= 5 else { return false }
+        // Don't ask after a bad session (> 50% Gewusst)
+        guard total > 0, Double(goodCount) / Double(total) >= 0.5 else { return false }
+        // Respect cooldown: never more often than every 120 days
+        let last = Date(timeIntervalSince1970: lastReviewPromptTS)
+        let daysSince = Calendar.current.dateComponents([.day], from: last, to: Date()).day ?? Int.max
+        return daysSince >= 120
+    }
 
     var body: some View {
         VStack(spacing: 32) {
@@ -600,6 +619,15 @@ struct SummaryView: View {
             }
             .padding(.horizontal, 32)
             .padding(.bottom, 32)
+        }
+        .onAppear {
+            guard shouldPromptReview else { return }
+            // Delay so the summary is visible before the system dialog appears
+            Task {
+                try? await Task.sleep(nanoseconds: 1_500_000_000)
+                lastReviewPromptTS = Date().timeIntervalSince1970
+                requestReview()
+            }
         }
     }
 }

@@ -32,7 +32,9 @@ struct AddLanguageView: View {
                                         .font(.caption)
                                         .fontWeight(.medium)
                                         .foregroundStyle(.primary)
-                                        .lineLimit(1)
+                                        .lineLimit(2)
+                                        .minimumScaleFactor(0.75)
+                                        .multilineTextAlignment(.center)
                                 }
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 16)

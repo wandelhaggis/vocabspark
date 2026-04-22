@@ -309,6 +309,7 @@ struct VocabListView: View {
                         testDirection = dir
                     } label: {
                         Text(dir.icon)
+                            .environment(\.layoutDirection, .leftToRight)
                             .font(.caption)
                             .fontWeight(testDirection == dir ? .bold : .regular)
                             .padding(.horizontal, 12)

@@ -131,6 +131,7 @@ struct SessionSetupView: View {
                                     }
                                 } label: {
                                     Text(dir.icon)
+                                        .environment(\.layoutDirection, .leftToRight)
                                         .font(.subheadline)
                                         .fontWeight(direction == dir ? .bold : .regular)
                                         .frame(maxWidth: .infinity)

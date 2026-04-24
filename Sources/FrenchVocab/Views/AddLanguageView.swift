@@ -12,12 +12,31 @@ struct AddLanguageView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: 20) {
+                    // Native language picker — on top so it's always visible and
+                    // signals "set your own language first, then pick the target".
+                    HStack {
+                        Text("Meine Sprache")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Spacer()
+                        Picker("Meine Sprache", selection: $nativeCode) {
+                            ForEach(LanguageCatalog.nativeCapableLanguages, id: \.code) { lang in
+                                Text("\(lang.emoji) \(lang.localizedName)").tag(lang.code)
+                            }
+                        }
+                        .labelsHidden()
+                    }
+                    .padding(.horizontal)
+                    .padding(.top)
+
+                    Divider()
+                        .padding(.horizontal, 40)
+
                     Text("Welche Sprache m\u{F6}chtest du lernen?")
                         .font(.title3)
                         .fontWeight(.bold)
                         .fontDesign(.rounded)
-                        .padding(.top)
 
                     // Target language grid
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
@@ -47,29 +66,12 @@ struct AddLanguageView: View {
                         }
                     }
                     .padding(.horizontal)
-
-                    Divider()
-                        .padding(.horizontal, 40)
-
-                    // Native language picker
-                    HStack {
-                        Text("Meine Sprache")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                        Spacer()
-                        Picker("Meine Sprache", selection: $nativeCode) {
-                            ForEach(LanguageCatalog.nativeCapableLanguages, id: \.code) { lang in
-                                Text("\(lang.emoji) \(lang.localizedName)").tag(lang.code)
-                            }
-                        }
-                        .labelsHidden()
-                    }
-                    .padding(.horizontal)
                     .padding(.bottom, 8)
                 }
             }
             .navigationTitle("Sprache w\u{E4}hlen")
             .navigationBarTitleDisplayMode(.inline)
+            .presentationDetents([.large])
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Abbrechen") { dismiss() }

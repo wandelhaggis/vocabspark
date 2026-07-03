@@ -3,10 +3,6 @@ import SwiftData
 
 @main
 struct VocabSparkApp: App {
-    @AppStorage("dailyReminderEnabled") private var reminderEnabled = false
-    @AppStorage("dailyReminderHour") private var reminderHour = 17
-    @AppStorage("dailyReminderMinute") private var reminderMinute = 0
-
     init() {
         // Fix #8: migrate any existing API key from UserDefaults to Keychain
         KeychainService.migrateFromUserDefaultsIfNeeded()
@@ -17,11 +13,6 @@ struct VocabSparkApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
-                .task {
-                    if reminderEnabled {
-                        await NotificationService.shared.enableReminder(hour: reminderHour, minute: reminderMinute)
-                    }
-                }
         }
         .modelContainer(for: [VocabItem.self, SessionRecord.self, LanguageDeck.self, MasteryEvent.self])
     }
@@ -29,12 +20,27 @@ struct VocabSparkApp: App {
 
 struct RootView: View {
     @State private var selectedDeck: LanguageDeck?
+    @Environment(\.modelContext) private var modelContext
+    @AppStorage("dailyReminderEnabled") private var reminderEnabled = false
+    @AppStorage("dailyReminderHour") private var reminderHour = 17
+    @AppStorage("dailyReminderMinute") private var reminderMinute = 0
 
     var body: some View {
-        if let deck = selectedDeck {
-            ContentView(deck: deck, onSwitchLanguage: { selectedDeck = nil })
-        } else {
-            LanguagePickerView(selectedDeck: $selectedDeck)
+        Group {
+            if let deck = selectedDeck {
+                ContentView(deck: deck, onSwitchLanguage: { selectedDeck = nil })
+            } else {
+                LanguagePickerView(selectedDeck: $selectedDeck)
+            }
+        }
+        .task {
+            if reminderEnabled {
+                await NotificationService.shared.refreshReminderSchedule(
+                    hour: reminderHour,
+                    minute: reminderMinute,
+                    modelContext: modelContext
+                )
+            }
         }
     }
 }

@@ -475,6 +475,21 @@ struct LearningSessionView: View {
         modelContext.insert(record)
         streakManager.recordSession(cardCount: sessionResults.count)
         completedSessionCount += 1
+
+        // SRS state changed — re-plan reminders so they only fire on days with due cards.
+        let reminderEnabled = UserDefaults.standard.bool(forKey: "dailyReminderEnabled")
+        if reminderEnabled {
+            let hour = UserDefaults.standard.object(forKey: "dailyReminderHour") as? Int ?? 17
+            let minute = UserDefaults.standard.object(forKey: "dailyReminderMinute") as? Int ?? 0
+            let context = modelContext
+            Task { @MainActor in
+                await NotificationService.shared.refreshReminderSchedule(
+                    hour: hour,
+                    minute: minute,
+                    modelContext: context
+                )
+            }
+        }
     }
 
     private func resolveDirection() {

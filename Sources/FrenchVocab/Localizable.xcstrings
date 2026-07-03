@@ -6829,104 +6829,104 @@
         }
       }
     },
-    "Du bekommst jeden Tag zur gewählten Uhrzeit eine Erinnerung." : {
-      "comment" : "SettingsView.swift:128",
+    "Du bekommst zur gewählten Uhrzeit nur dann eine Erinnerung, wenn Vokabeln zum Lernen fällig sind." : {
+      "comment" : "SettingsView.swift:131",
       "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "سيصلك تذكير كل يوم في الوقت الذي تختاره."
+            "value" : "ستتلقى تذكيراً في الوقت الذي اخترته فقط إذا كانت هناك مفردات جاهزة للمراجعة."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Du bekommst jeden Tag zur gewählten Uhrzeit eine Erinnerung."
+            "value" : "Du bekommst zur gewählten Uhrzeit nur dann eine Erinnerung, wenn Vokabeln zum Lernen fällig sind."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Θα λαμβάνεις υπενθύμιση κάθε μέρα στην ώρα που επέλεξες."
+            "value" : "Θα λαμβάνεις υπενθύμιση στην ώρα που επέλεξες μόνο αν υπάρχουν λέξεις για επανάληψη."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You'll get a reminder every day at the chosen time."
+            "value" : "You'll only get a reminder at the chosen time when there are vocab cards due."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Recibirás un recordatorio cada día a la hora elegida."
+            "value" : "Solo recibirás un recordatorio a la hora elegida si hay vocabulario pendiente."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu recevras un rappel chaque jour à l'heure choisie."
+            "value" : "Tu ne recevras un rappel à l'heure choisie que s'il y a du vocabulaire à réviser."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Riceverai un promemoria ogni giorno all'ora scelta."
+            "value" : "Riceverai un promemoria all'ora scelta solo se ci sono parole da ripassare."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "毎日、指定した時刻にリマインダーが届きます。"
+            "value" : "復習する単語があるときだけ、指定した時刻にリマインダーが届きます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "매일 선택한 시간에 알림을 받아요."
+            "value" : "복습할 단어가 있을 때만 선택한 시간에 알림을 받아요."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Je krijgt elke dag op het gekozen tijdstip een herinnering."
+            "value" : "Je krijgt alleen een herinnering op het gekozen tijdstip als er woorden te oefenen zijn."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Każdego dnia o wybranej godzinie dostaniesz przypomnienie."
+            "value" : "Przypomnienie o wybranej godzinie dostaniesz tylko wtedy, gdy są słówka do powtórzenia."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Recebes um lembrete todos os dias à hora escolhida."
+            "value" : "Só recebes um lembrete à hora escolhida se houver palavras para rever."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ты будешь получать напоминание каждый день в выбранное время."
+            "value" : "Ты будешь получать напоминание в выбранное время, только если есть слова для повторения."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Du får en påminnelse varje dag vid vald tid."
+            "value" : "Du får bara en påminnelse vid vald tid om det finns ord att öva."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Her gün seçtiğin saatte bir hatırlatma alırsın."
+            "value" : "Sadece tekrar edilecek kelimeler varsa, seçtiğin saatte hatırlatma alırsın."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "你每天会在所选时间收到提醒。"
+            "value" : "只有当有需要复习的词汇时，你才会在所选时间收到提醒。"
           }
         }
       }

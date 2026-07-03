@@ -1,8 +1,11 @@
 import SwiftUI
+import SwiftData
 import UniformTypeIdentifiers
 
 struct SettingsView: View {
     let deck: LanguageDeck
+
+    @Environment(\.modelContext) private var modelContext
 
     // Fix #8: API key now stored in Keychain instead of UserDefaults
     @State private var storedKey: String = KeychainService.load() ?? ""
@@ -102,13 +105,17 @@ struct SettingsView: View {
                     .onChange(of: reminderEnabled) { _, enabled in
                         Task {
                             if enabled {
-                                await NotificationService.shared.enableReminder(hour: reminderHour, minute: reminderMinute)
+                                await NotificationService.shared.refreshReminderSchedule(
+                                    hour: reminderHour,
+                                    minute: reminderMinute,
+                                    modelContext: modelContext
+                                )
                                 let authorized = await NotificationService.shared.isAuthorized()
                                 if !authorized {
                                     reminderEnabled = false
                                 }
                             } else {
-                                NotificationService.shared.disableReminder()
+                                await NotificationService.shared.disableReminder()
                             }
                         }
                     }
@@ -125,7 +132,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Erinnerung")
                 } footer: {
-                    Text("Du bekommst jeden Tag zur gew\u{E4}hlten Uhrzeit eine Erinnerung.")
+                    Text("Du bekommst zur gew\u{E4}hlten Uhrzeit nur dann eine Erinnerung, wenn Vokabeln zum Lernen f\u{E4}llig sind.")
                 }
 
                 // CSV Import
@@ -206,7 +213,11 @@ struct SettingsView: View {
     private func rescheduleReminder() {
         guard reminderEnabled else { return }
         Task {
-            await NotificationService.shared.enableReminder(hour: reminderHour, minute: reminderMinute)
+            await NotificationService.shared.refreshReminderSchedule(
+                hour: reminderHour,
+                minute: reminderMinute,
+                modelContext: modelContext
+            )
         }
     }
 }

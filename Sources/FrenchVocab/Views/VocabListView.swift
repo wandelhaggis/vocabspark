@@ -32,7 +32,8 @@ struct VocabListView: View {
     // Test mode
     @State private var isTestMode = false
     @State private var selectedForTest: Set<UUID> = []
-    @State private var testDirection: LearningDirection = .random
+    // Tester-Report 2: Auswahl übersteht App-Neustarts (AppStorage statt @State).
+    @AppStorage("testDirection") private var testDirection: LearningDirection = .random
     @State private var isTestActive = false
 
     /// Items belonging to the current deck.
@@ -193,7 +194,9 @@ struct VocabListView: View {
 
     @ViewBuilder
     private var vocabList: some View {
-        List {
+        // Tester-Report 5: native edit-mode selection so multiple rows can be
+        // (de)selected by dragging a finger over the selection circles.
+        List(selection: $selectedForTest) {
             if !isTestMode && dueCount > 0 {
                 Section {
                     HStack(spacing: 10) {
@@ -263,36 +266,24 @@ struct VocabListView: View {
             }
         }
         .searchable(text: $searchText, prompt: "Suchen...")
+        .environment(\.editMode, .constant(isTestMode ? EditMode.active : EditMode.inactive))
+        .tint(.indigo)
     }
 
     // MARK: - Test Mode Row
 
     @ViewBuilder
     private func testRow(item: VocabItem) -> some View {
-        let isSelected = selectedForTest.contains(item.id)
-        Button {
-            if isSelected {
-                selectedForTest.remove(item.id)
-            } else {
-                selectedForTest.insert(item.id)
-            }
-        } label: {
-            HStack(spacing: 12) {
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.title3)
-                    .foregroundStyle(isSelected ? .indigo : .secondary)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(item.term)
-                        .font(.body)
-                        .fontWeight(.semibold)
-                    Text(item.translation)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                Spacer()
-            }
+        // Selection circle + tap/drag handling come from the List's edit mode.
+        VStack(alignment: .leading, spacing: 4) {
+            Text(item.term)
+                .font(.body)
+                .fontWeight(.semibold)
+            Text(item.translation)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
-        .tint(.primary)
+        .tag(item.id)
     }
 
     // MARK: - Test Bottom Bar

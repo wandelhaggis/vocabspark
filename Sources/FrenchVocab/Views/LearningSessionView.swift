@@ -69,9 +69,10 @@ struct LearningSessionView: View {
         return isTermPrompt ? item.exampleTranslation : item.exampleSentence
     }
 
+    /// Work-based progress (Tester-Report 3): grows with every rating instead
+    /// of only with mastered cards — see SessionDeckEngine.progress.
     var progress: CGFloat {
-        guard engine.totalCount > 0 else { return 0 }
-        return CGFloat(engine.mastered.count) / CGFloat(engine.totalCount)
+        CGFloat(engine.progress)
     }
 
     var body: some View {
@@ -115,7 +116,7 @@ struct LearningSessionView: View {
                             )
                         )
                         .frame(width: geo.size.width * progress)
-                        .animation(.spring(duration: 0.4), value: engine.mastered.count)
+                        .animation(.spring(duration: 0.4), value: engine.generation)
                 }
             }
             .frame(height: 5)

@@ -95,6 +95,32 @@ Hand am Gerät oder Simulator. Nach bestandenem Test: committen (Wortlaut siehe 
 - [ ] **8d** Fortschritts-Chart aktualisiert sich nach der Session (MasteryEvents).
 - [ ] **8e** Einmal iPhone-Simulator (beliebig): Karten-Layout in compact-Größe okay.
 
+## 9. Tester-Fixes vom 2026-07-04 (zweite Runde)
+
+Bereits im Simulator verifiziert (Screenshot-gestützt, 2026-07-04): Richtung "Zufall"
+übersteht App-Neustart (Fix 2), Fortschrittsbalken wächst bei "Nochmal" statt zu hängen
+(Fix 3), Drag-Selektion über die Auswahlkreise im Vokabeltest funktioniert (Fix 5).
+Unit-getestet: Erinnerungs-Planung (Fix 6). Bleibt für Hand am Gerät:
+
+- [ ] **9a** *(mit OpenAI-Key)* TTS-Timing: "Anhören" tippen — sobald die Stimme fertig
+  ist, muss der Button **sofort** wieder tippbar sein (vorher: mehrere Sekunden gesperrt,
+  weil die volle MP3-Länge inkl. Endstille abgewartet wurde). Mit einem längeren
+  Beispielsatz wiederholen.
+- [ ] **9b** *(mit OpenAI-Key)* TTS abbrechen: Während der Wiedergabe die Karte bewerten
+  → Ton stoppt, nichts hängt, nächste Karte normal bedienbar.
+- [ ] **9c** Persistenz komplett: Richtung in Lernsession UND Karten-Filter ("Fällige"/"Alle")
+  UND Richtung im Vokabeltest ändern, App aus dem App-Switcher werfen, neu starten —
+  alle drei Einstellungen unverändert.
+- [ ] **9d** Balken-Gefühl im echten Durchlauf: Session mit vielen "Nochmal" spielen —
+  Balken wächst bei jeder Bewertung, springt nie zurück, ist exakt voll wenn die
+  Zusammenfassung kommt. Zähler "x von y" zählt weiterhin nur Gemeistertes.
+- [ ] **9e** Erinnerung nach Session: Erinnerung aktiv, Zeit ein paar Minuten in die
+  Zukunft, dann eine Session abschließen → heute KEINE Notification mehr. Am Folgetag
+  (oder Datum vorstellen) mit fälligen Karten → Notification kommt wieder.
+- [ ] **9f** Drag-Selektion auf dem Gerät: Im Vokabeltest mit dem Finger über die
+  Auswahlkreise streichen — zusammenhängende Auswahl; über bereits gewählte streichen
+  wählt ab. Scrollen der Liste (Drag rechts neben den Kreisen) funktioniert weiter.
+
 ## Bekannte bewusste Entscheidungen (kein Testbedarf, nur Kontext)
 
 - Swipe-Richtung ist absichtlich **physisch** auch bei RTL (deshalb 6a).

@@ -110,6 +110,9 @@ class TTSService: ObservableObject {
     /// Stop any playing audio immediately.
     func stop() {
         player?.stop()
+        // Resume a pending playAudio() await — AVAudioPlayer.stop() does NOT
+        // fire the delegate callback, so without this the task would hang.
+        finishPlayback?()
         isPlaying = false
         isLoading = false
     }
@@ -176,28 +179,81 @@ class TTSService: ObservableObject {
         return data
     }
 
+    /// Resumes the continuation of the currently awaited playback (exactly once).
+    private var finishPlayback: (() -> Void)?
+    private var playbackDelegate: PlaybackDelegate?
+
+    /// Tester-Report 1: wait for the REAL end of playback via delegate callback.
+    /// The previous Task.sleep(player.duration) blocked for the full decoded MP3
+    /// length including trailing silence — buttons stayed disabled for seconds
+    /// after the voice had finished.
     private func playAudio(from url: URL) async {
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
             try AVAudioSession.sharedInstance().setActive(true)
-            player = try AVAudioPlayer(contentsOf: url)
-            isPlaying = true
-            player?.play()
-            if let duration = player?.duration, duration > 0 {
-                try await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
-            }
-            isPlaying = false
-            // Fix #10: release audio session so other apps' audio resumes
-            try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
-        } catch is CancellationError {
-            isPlaying = false
-            try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         } catch {
-            isPlaying = false
+            return
         }
+
+        guard let newPlayer = try? AVAudioPlayer(contentsOf: url), !Task.isCancelled else {
+            try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+            return
+        }
+        player = newPlayer
+        isPlaying = true
+
+        await withTaskCancellationHandler {
+            await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                var resumed = false
+                let finish = {
+                    guard !resumed else { return }
+                    resumed = true
+                    continuation.resume()
+                }
+                finishPlayback = finish
+
+                let delegate = PlaybackDelegate {
+                    Task { @MainActor in finish() }
+                }
+                playbackDelegate = delegate
+                newPlayer.delegate = delegate
+
+                if !newPlayer.play() {
+                    finish()
+                }
+            }
+        } onCancel: {
+            // stop() resumes the continuation and halts the player.
+            Task { @MainActor in self.stop() }
+        }
+
+        isPlaying = false
+        finishPlayback = nil
+        playbackDelegate = nil
+        // Fix #10: release audio session so other apps' audio resumes
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
 
     enum TTSError: Error {
         case apiError
+    }
+}
+
+/// Bridges AVAudioPlayerDelegate callbacks to a completion closure.
+/// Kept as a stored property on TTSService while playback runs
+/// (AVAudioPlayer.delegate is weak).
+private final class PlaybackDelegate: NSObject, AVAudioPlayerDelegate {
+    private let onFinish: () -> Void
+
+    init(onFinish: @escaping () -> Void) {
+        self.onFinish = onFinish
+    }
+
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        onFinish()
+    }
+
+    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        onFinish()
     }
 }

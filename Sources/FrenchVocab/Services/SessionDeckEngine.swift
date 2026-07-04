@@ -42,6 +42,19 @@ struct SessionDeckEngine {
     var currentID: UUID? { cardIDs.first }
     var isFinished: Bool { cardIDs.isEmpty }
 
+    /// Work-based progress for the session bar: completed ratings vs. total
+    /// work (completed + cards still in the deck). Grows on EVERY rating —
+    /// "Nochmal" visibly adds work instead of stalling the bar (tester report:
+    /// bar hung at ~50% because it only counted mastered cards).
+    var progress: Double {
+        let totalWork = ratingsCount + cardIDs.count
+        guard totalWork > 0 else { return 1 }
+        return Double(ratingsCount) / Double(totalWork)
+    }
+
+    /// Number of ratings given so far (both "Nochmal" and "Gewusst!").
+    private(set) var ratingsCount: Int = 0
+
     /// "Nochmal": the card goes back into the deck and its final SRS rating
     /// for this session is locked to .again.
     mutating func rateAgain() {
@@ -60,6 +73,7 @@ struct SessionDeckEngine {
             cardIDs.insert(id, at: insertAt)
         }
 
+        ratingsCount += 1
         generation += 1
     }
 
@@ -71,6 +85,7 @@ struct SessionDeckEngine {
         mastered.insert(id)
         let final: SRSRating = repeatedIDs.contains(id) ? .again : .good
         results.append(final)
+        ratingsCount += 1
         generation += 1
         return final
     }

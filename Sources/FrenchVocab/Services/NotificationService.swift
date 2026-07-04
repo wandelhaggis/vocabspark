@@ -31,24 +31,65 @@ class NotificationService {
 
         let calendar = Calendar.current
         let now = Date()
-        let today = calendar.startOfDay(for: now)
 
-        for offset in 0..<scheduleHorizonDays {
+        // Tester-Report 6: no reminder today if a session was already completed.
+        // SessionRecord is written on every saved session (unlike the streak,
+        // which only counts sessions with 10+ cards).
+        let startOfToday = calendar.startOfDay(for: now)
+        let sessionsToday = FetchDescriptor<SessionRecord>(
+            predicate: #Predicate { $0.date >= startOfToday }
+        )
+        let hasLearnedToday = ((try? modelContext.fetchCount(sessionsToday)) ?? 0) > 0
+
+        let triggerDates = Self.plannedReminderDates(
+            dueDates: dueDates,
+            hasLearnedToday: hasLearnedToday,
+            hour: hour,
+            minute: minute,
+            horizonDays: scheduleHorizonDays,
+            now: now,
+            calendar: calendar
+        )
+        for date in triggerDates {
+            scheduleReminder(at: date, calendar: calendar)
+        }
+    }
+
+    func disableReminder() async {
+        await clearAllReminders()
+    }
+
+    /// Pure planning logic, separated from UNUserNotificationCenter for testability.
+    /// Returns the trigger dates for the next `horizonDays` days: only days on
+    /// which at least one card is already due by reminder time — and today only
+    /// if the user hasn't completed a session yet (Tester-Report 6).
+    nonisolated static func plannedReminderDates(
+        dueDates: [Date],
+        hasLearnedToday: Bool,
+        hour: Int,
+        minute: Int,
+        horizonDays: Int = 14,
+        now: Date,
+        calendar: Calendar = .current
+    ) -> [Date] {
+        let today = calendar.startOfDay(for: now)
+        var result: [Date] = []
+
+        for offset in 0..<horizonDays {
             guard let dayStart = calendar.date(byAdding: .day, value: offset, to: today) else { continue }
             var components = calendar.dateComponents([.year, .month, .day], from: dayStart)
             components.hour = hour
             components.minute = minute
             guard let triggerDate = calendar.date(from: components), triggerDate > now else { continue }
 
+            if hasLearnedToday && calendar.isDate(triggerDate, inSameDayAs: now) { continue }
+
             let hasDue = dueDates.contains { $0 <= triggerDate }
             guard hasDue else { continue }
 
-            scheduleReminder(at: triggerDate, components: components)
+            result.append(triggerDate)
         }
-    }
-
-    func disableReminder() async {
-        await clearAllReminders()
+        return result
     }
 
     /// Returns true if notifications are authorized at the OS level.
@@ -65,12 +106,13 @@ class NotificationService {
         }
     }
 
-    private func scheduleReminder(at date: Date, components: DateComponents) {
+    private func scheduleReminder(at date: Date, calendar: Calendar) {
         let content = UNMutableNotificationContent()
         content.title = String(localized: "Zeit zum Lernen! \u{1F4DA}", comment: "Daily reminder notification title")
         content.body = String(localized: "Deine Vokabeln warten. Nur 5 Minuten!", comment: "Daily reminder notification body")
         content.sound = .default
 
+        let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: date)
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
         let id = identifier(for: date)
         let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)

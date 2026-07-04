@@ -97,8 +97,8 @@ struct VocabTestSessionView: View {
                                 endPoint: .trailing
                             )
                         )
-                        .frame(width: engine.totalCount > 0 ? geo.size.width * CGFloat(engine.mastered.count) / CGFloat(engine.totalCount) : 0)
-                        .animation(.spring(duration: 0.4), value: engine.mastered.count)
+                        .frame(width: geo.size.width * CGFloat(engine.progress))
+                        .animation(.spring(duration: 0.4), value: engine.generation)
                 }
             }
             .frame(height: 5)

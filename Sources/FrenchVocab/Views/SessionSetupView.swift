@@ -35,8 +35,9 @@ struct SessionSetupView: View {
     @Query(sort: \SessionRecord.date, order: .reverse) private var allSessions: [SessionRecord]
     @ObservedObject private var streakManager = StreakManager.shared
 
-    @State private var direction: LearningDirection = .frToDE
-    @State private var filter: SessionFilter = .dueOnly
+    // Tester-Report 2: Auswahl übersteht App-Neustarts (AppStorage statt @State).
+    @AppStorage("sessionDirection") private var direction: LearningDirection = .frToDE
+    @AppStorage("sessionFilter") private var filter: SessionFilter = .dueOnly
     @State private var isLearning = false
 
     /// Items belonging to the current deck.

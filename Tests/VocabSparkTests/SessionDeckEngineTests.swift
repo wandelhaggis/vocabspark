@@ -107,6 +107,50 @@ struct SessionDeckEngineTests {
         #expect(engine.generation == 2)
     }
 
+    // MARK: - Progress (work-based session bar, Tester-Report 3)
+
+    @Test func progress_startsAtZero() {
+        let engine = SessionDeckEngine(cardIDs: ids(3))
+        #expect(engine.progress == 0)
+    }
+
+    @Test func progress_reachesOneExactlyWhenFinished() {
+        var engine = SessionDeckEngine(cardIDs: ids(2))
+        engine.rateAgain()
+        _ = engine.rateGood()
+        #expect(engine.progress < 1)
+        _ = engine.rateGood()
+        #expect(engine.progress == 1)
+        #expect(engine.isFinished)
+    }
+
+    @Test func progress_afterGoodOnTwoCardDeck_isOneHalf() {
+        var engine = SessionDeckEngine(cardIDs: ids(2))
+        _ = engine.rateGood()
+        // 1 rating done, 1 card left → 1 / (1 + 1)
+        #expect(engine.progress == 0.5)
+    }
+
+    @Test func rateAgain_alsoIncreasesProgress() {
+        var engine = SessionDeckEngine(cardIDs: ids(2))
+        let before = engine.progress
+        engine.rateAgain()
+        // 1 rating done, still 2 cards left → 1 / (1 + 2)
+        #expect(engine.progress > before)
+        #expect(engine.progress == 1.0 / 3.0)
+    }
+
+    @Test func progress_neverDecreases_underMixedRatings() {
+        var engine = SessionDeckEngine(cardIDs: ids(4))
+        var last = engine.progress
+        for step in 0..<12 {
+            if engine.isFinished { break }
+            if step % 3 == 0 { engine.rateAgain() } else { _ = engine.rateGood() }
+            #expect(engine.progress >= last, "progress shrank at step \(step)")
+            last = engine.progress
+        }
+    }
+
     // MARK: - Random reinsert (vocab test drill)
 
     @Test func randomReinsert_neverPlacesCardBackAtFront() {

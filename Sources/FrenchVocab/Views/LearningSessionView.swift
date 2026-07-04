@@ -17,17 +17,9 @@ struct LearningSessionView: View {
     private var answerFontSize: CGFloat { hSize == .compact ? 24 : 30 }
     private var cardPadding: CGFloat { hSize == .compact ? 20 : 32 }
 
-    // Deck-based: cards cycle until all rated .good
-    @State private var cardDeck: [VocabItem]
-    @State private var mastered: Set<UUID> = []
+    /// Deck state machine: cards cycle until rated "Gewusst!".
+    @State private var engine: SessionDeckEngine
     @State private var isRevealed = false
-    @State private var sessionResults: [SRSRating] = []
-    /// Worst rating per card in this session — used for final SRS update.
-    @State private var cardWorstRating: [UUID: SRSRating] = [:]
-    /// Fix #1: lock to prevent double-rate during the success flash animation.
-    @State private var isAdvancing = false
-    /// Fix #19: hold the flash-advance task so we can cancel on dismiss.
-    @State private var advanceTask: Task<Void, Never>?
     /// Total completed sessions — used to throttle review prompt.
     @AppStorage("completedSessionCount") private var completedSessionCount = 0
     /// Fix #4: prevent saveSession from running twice.
@@ -36,20 +28,23 @@ struct LearningSessionView: View {
     @State private var resolvedDirection: LearningDirection = .frToDE
     @State private var ttsTask: Task<Void, Never>?
     @State private var showSuccessFlash = false
+    @State private var flashResetTask: Task<Void, Never>?
+    /// Short delay before the summary so the last card's fly-out stays visible.
+    @State private var summaryTask: Task<Void, Never>?
     @FocusState private var isFocused: Bool
 
-    let totalCount: Int
+    private let itemsByID: [UUID: VocabItem]
 
     init(items: [VocabItem], direction: LearningDirection, deck: LanguageDeck) {
         self.items = items
         self.direction = direction
         self.deck = deck
-        self.totalCount = items.count
-        _cardDeck = State(initialValue: items)
+        self.itemsByID = Dictionary(items.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        _engine = State(initialValue: SessionDeckEngine(cardIDs: items.map(\.id)))
     }
 
     var current: VocabItem? {
-        cardDeck.first
+        engine.currentID.flatMap { itemsByID[$0] }
     }
 
     var promptText: String {
@@ -75,25 +70,26 @@ struct LearningSessionView: View {
     }
 
     var progress: CGFloat {
-        guard totalCount > 0 else { return 0 }
-        return CGFloat(mastered.count) / CGFloat(totalCount)
+        guard engine.totalCount > 0 else { return 0 }
+        return CGFloat(engine.mastered.count) / CGFloat(engine.totalCount)
     }
 
     var body: some View {
         Group {
             if showingSummary {
                 SummaryView(
-                    total: totalCount,
-                    results: sessionResults,
+                    total: engine.totalCount,
+                    results: engine.results,
                     onDone: { dismiss() }
                 )
-            } else if current != nil {
+            } else {
                 cardView
             }
         }
         .onDisappear {
             ttsTask?.cancel()
-            advanceTask?.cancel()  // Fix #19
+            flashResetTask?.cancel()
+            summaryTask?.cancel()
             tts.stop()
             // Fix #4: save partial progress when user abandons session
             saveSession()
@@ -119,7 +115,7 @@ struct LearningSessionView: View {
                             )
                         )
                         .frame(width: geo.size.width * progress)
-                        .animation(.spring(duration: 0.4), value: mastered.count)
+                        .animation(.spring(duration: 0.4), value: engine.mastered.count)
                 }
             }
             .frame(height: 5)
@@ -139,7 +135,7 @@ struct LearningSessionView: View {
                     .foregroundStyle(.secondary)
                 }
                 Spacer()
-                Text("\(mastered.count) von \(totalCount)")
+                Text("\(engine.mastered.count) von \(engine.totalCount)")
                     .font(.subheadline)
                     .fontWeight(.semibold)
                     .fontDesign(.rounded)
@@ -149,73 +145,35 @@ struct LearningSessionView: View {
 
             Spacer()
 
-            // Card content
-            VStack(spacing: 20) {
-                // Prompt card
-                VStack(spacing: 14) {
-                    Text(isTermPrompt ? "\(deck.emoji) \(deck.displayName)" : deck.nativeLabel)
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
-                        .tracking(1.5)
-
-                    Text(promptText)
-                        .font(.system(size: promptFontSize, weight: .semibold, design: .rounded))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-
-                    if isTermPrompt && tts.isAvailable {
-                        ttsButton(text: promptText)
-                    }
-
-                    if let example = promptExample {
-                        Divider().padding(.horizontal, 20)
-                        exampleRow(text: example, isTerm: isTermPrompt)
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .padding(cardPadding)
-                .background(.background)
-                .clipShape(RoundedRectangle(cornerRadius: 20))
-                .shadow(color: .black.opacity(0.08), radius: 12, y: 4)
-
-                // Answer card (revealed)
-                if isRevealed {
-                    VStack(spacing: 14) {
-                        Text(isTermPrompt ? deck.nativeLabel : "\(deck.emoji) \(deck.displayName)")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.secondary)
-                            .textCase(.uppercase)
-                            .tracking(1.5)
-
-                        Text(answerText)
-                            .font(.system(size: answerFontSize, weight: .medium, design: .rounded))
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-
-                        if !isTermPrompt && tts.isAvailable {
-                            ttsButton(text: answerText)
-                        }
-
-                        if let example = answerExample {
-                            Divider().padding(.horizontal, 20)
-                            exampleRow(text: example, isTerm: !isTermPrompt)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(28)
-                    .background(Color(.systemGray6))
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
+            // Card content — a fresh identity per advance means the outgoing
+            // card always animates out with its own (old) content.
+            Group {
+                if current != nil {
+                    SessionCardView(
+                        promptLabel: isTermPrompt ? "\(deck.emoji) \(deck.displayName)" : deck.nativeLabel,
+                        answerLabel: isTermPrompt ? deck.nativeLabel : "\(deck.emoji) \(deck.displayName)",
+                        promptText: promptText,
+                        answerText: answerText,
+                        promptExample: promptExample,
+                        answerExample: answerExample,
+                        promptIsTerm: isTermPrompt,
+                        ttsLanguage: deck.ttsLanguage,
+                        isRevealed: isRevealed,
+                        promptFontSize: promptFontSize,
+                        answerFontSize: answerFontSize,
+                        cardPadding: cardPadding,
+                        leftBadge: .init(icon: "xmark.circle.fill", color: .red),
+                        rightBadge: .init(icon: "checkmark.circle.fill", color: .green),
+                        onSwipe: handleSwipe
+                    )
+                    .id(engine.generation)
                     .transition(.asymmetric(
-                        insertion: .scale(scale: 0.9).combined(with: .opacity),
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
                         removal: .opacity
                     ))
                 }
             }
             .padding(.horizontal, 28)
-            .animation(.spring(duration: 0.35, bounce: 0.2), value: isRevealed)
 
             Spacer()
 
@@ -227,35 +185,37 @@ struct LearningSessionView: View {
                     .padding(.bottom, 8)
             }
 
-            // Bottom buttons
-            if isRevealed {
-                ratingButtons
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 32)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-            } else {
-                Button {
-                    revealCard()
-                } label: {
-                    Text("Aufdecken")
-                        .font(.title3)
-                        .fontWeight(.bold)
-                        .fontDesign(.rounded)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(
-                            LinearGradient(
-                                colors: [.indigo, .purple],
-                                startPoint: .leading,
-                                endPoint: .trailing
+            // Bottom buttons (hidden once the deck is empty and the summary is pending)
+            if !engine.isFinished {
+                if isRevealed {
+                    ratingButtons
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 32)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                } else {
+                    Button {
+                        revealCard()
+                    } label: {
+                        Text("Aufdecken")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .fontDesign(.rounded)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(
+                                LinearGradient(
+                                    colors: [.indigo, .purple],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
                             )
-                        )
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .shadow(color: .indigo.opacity(0.3), radius: 8, y: 4)
+                            .foregroundStyle(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .shadow(color: .indigo.opacity(0.3), radius: 8, y: 4)
+                    }
+                    .padding(.horizontal, 28)
+                    .padding(.bottom, 32)
                 }
-                .padding(.horizontal, 28)
-                .padding(.bottom, 32)
             }
         }
         .background(
@@ -287,13 +247,6 @@ struct LearningSessionView: View {
         }
         .onKeyPress("2") {
             if isRevealed {
-                rate(.hard)
-                return .handled
-            }
-            return .ignored
-        }
-        .onKeyPress("3") {
-            if isRevealed {
                 rate(.good)
                 return .handled
             }
@@ -305,50 +258,6 @@ struct LearningSessionView: View {
         }
     }
 
-    // MARK: - Example Row
-
-    @ViewBuilder
-    private func exampleRow(text: String, isTerm: Bool) -> some View {
-        HStack(spacing: 8) {
-            Text("\u{AB}\(text)\u{BB}")
-                .font(.subheadline)
-                .italic()
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-
-            if isTerm && tts.isAvailable {
-                Button {
-                    ttsTask?.cancel()
-                    ttsTask = Task { await tts.speak(text, language: deck.ttsLanguage) }
-                } label: {
-                    Image(systemName: tts.isPlaying ? "speaker.wave.3.fill" : "speaker.wave.2")
-                        .font(.caption)
-                        .foregroundStyle(.indigo)
-                }
-                .disabled(tts.isLoading || tts.isPlaying)
-            }
-        }
-    }
-
-    // MARK: - TTS Button
-
-    @ViewBuilder
-    private func ttsButton(text: String) -> some View {
-        Button {
-            ttsTask?.cancel()
-            ttsTask = Task { await tts.speak(text, language: deck.ttsLanguage) }
-        } label: {
-            HStack(spacing: 6) {
-                Image(systemName: tts.isLoading ? "hourglass" : (tts.isPlaying ? "speaker.wave.3.fill" : "speaker.wave.2"))
-                Text("Anh\u{F6}ren")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-            }
-            .foregroundStyle(.indigo)
-        }
-        .disabled(tts.isLoading || tts.isPlaying)
-    }
-
     // MARK: - Rating Buttons
 
     @ViewBuilder
@@ -358,15 +267,8 @@ struct LearningSessionView: View {
                 label: "Nochmal",
                 icon: "xmark.circle.fill",
                 color: .red,
-                description: "Sofort"
-            ) { rate(.again) }
-
-            RatingButton(
-                label: "Fast",
-                icon: "minus.circle.fill",
-                color: .orange,
                 description: "Sp\u{E4}ter"
-            ) { rate(.hard) }
+            ) { rate(.again) }
 
             RatingButton(
                 label: "Gewusst!",
@@ -375,53 +277,47 @@ struct LearningSessionView: View {
                 description: "Fertig"
             ) { rate(.good) }
         }
+        // Pin physical order: red must stay left so it matches swipe-left,
+        // also in RTL languages (same approach as the pinned i18n arrows).
+        .environment(\.layoutDirection, .leftToRight)
     }
 
     // MARK: - Logic
 
     private func revealCard() {
+        guard current != nil else { return }
         HapticService.light()
         withAnimation { isRevealed = true }
     }
 
-    /// MosaLingua-style rating:
-    /// - .again = show immediately again (stays at front)
-    /// - .hard  = move to end of deck (comes back this session)
-    /// - .good  = remove from deck (done for this session) + apply SRS
+    private func handleSwipe(_ direction: CardSwipeDirection) {
+        rate(direction == .right ? .good : .again)
+    }
+
+    /// 2-button rating:
+    /// - .again = "Nochmal": back to the end of the deck, final SRS rating
+    ///            locked to reset (comes back tomorrow)
+    /// - .good  = "Gewusst!": done for this session, SRS applied once
     private func rate(_ rating: SRSRating) {
-        // Fix #1: block rapid re-taps during the success-flash delay
-        guard !isAdvancing, let item = current else { return }
-
-        // Track worst rating per card (raw value: .again=0 < .hard=1 < .good=2)
-        let previousWorst = cardWorstRating[item.id]?.rawValue ?? Int.max
-        if rating.rawValue < previousWorst {
-            cardWorstRating[item.id] = rating
-        }
-
+        // Only a revealed card can be rated. Hiding it as the first mutation
+        // closes the double-tap window — no advancing lock needed.
+        guard isRevealed, let item = current else { return }
+        isRevealed = false
         ttsTask?.cancel()
         tts.stop()
 
         switch rating {
         case .again:
-            // Sofort nochmal: card stays at front, no SRS update yet
             HapticService.medium()
-            isRevealed = false
-            resolveDirection()
-
-        case .hard:
-            // Ans Ende setzen: no SRS update yet, card comes back later
-            HapticService.medium()
-            cardDeck.removeFirst()
-            cardDeck.append(item)
-            isRevealed = false
+            withAnimation(cardAdvanceAnimation) { engine.rateAgain() }
             resolveDirection()
 
         case .good:
-            // Fertig: apply SRS ONCE with the worst rating of this card in this session
-            isAdvancing = true
             HapticService.success()
-            showSuccessFlash = true
-            let finalRating = cardWorstRating[item.id] ?? .good
+            var finalRating: SRSRating = .good
+            withAnimation(cardAdvanceAnimation) {
+                finalRating = engine.rateGood() ?? .good
+            }
             // Track category transition for the progress chart
             let oldCategory = item.category
             SRSEngine.apply(rating: finalRating, to: item)
@@ -434,46 +330,52 @@ struct LearningSessionView: View {
                     deck: item.deck
                 ))
             }
-            sessionResults.append(finalRating)
-            advanceTask = Task {
-                try? await Task.sleep(nanoseconds: 350_000_000)
-                // Fix #19: abort if the view was dismissed during the flash
-                guard !Task.isCancelled else { return }
-                // Fix #2: update mastered + deck together with animation
-                withAnimation {
-                    showSuccessFlash = false
-                    mastered.insert(item.id)
-                    cardDeck.removeFirst()
-                }
-                isAdvancing = false
-                if cardDeck.isEmpty {
-                    saveSession()
+            flashSuccess()
+
+            if engine.isFinished {
+                saveSession()
+                summaryTask = Task {
+                    try? await Task.sleep(nanoseconds: 450_000_000)
+                    guard !Task.isCancelled else { return }
                     withAnimation { showingSummary = true }
-                } else {
-                    isRevealed = false
-                    resolveDirection()
                 }
+            } else {
+                resolveDirection()
             }
+        }
+    }
+
+    private var cardAdvanceAnimation: Animation {
+        .spring(duration: 0.35, bounce: 0.15)
+    }
+
+    /// Decorative, non-blocking success flash.
+    private func flashSuccess() {
+        flashResetTask?.cancel()
+        showSuccessFlash = true
+        flashResetTask = Task {
+            try? await Task.sleep(nanoseconds: 300_000_000)
+            guard !Task.isCancelled else { return }
+            showSuccessFlash = false
         }
     }
 
     private func saveSession() {
         // Fix #4: idempotent — called from both .onDisappear and completion
-        guard !sessionSaved, !sessionResults.isEmpty else { return }
+        guard !sessionSaved, !engine.results.isEmpty else { return }
         sessionSaved = true
 
-        let againCount = sessionResults.filter { $0 == .again }.count
-        let hardCount = sessionResults.filter { $0 == .hard }.count
-        let goodCount = sessionResults.filter { $0 == .good }.count
+        let againCount = engine.results.filter { $0 == .again }.count
+        let goodCount = engine.results.filter { $0 == .good }.count
 
         let record = SessionRecord(
-            totalCards: sessionResults.count,
+            totalCards: engine.results.count,
             againCount: againCount,
-            hardCount: hardCount,
+            hardCount: 0,
             goodCount: goodCount
         )
         modelContext.insert(record)
-        streakManager.recordSession(cardCount: sessionResults.count)
+        streakManager.recordSession(cardCount: engine.results.count)
         completedSessionCount += 1
 
         // SRS state changed — re-plan reminders so they only fire on days with due cards.
@@ -547,7 +449,6 @@ struct SummaryView: View {
     @AppStorage("lastReviewPromptTS") private var lastReviewPromptTS: Double = 0
 
     var againCount: Int { results.filter { $0 == .again }.count }
-    var hardCount: Int { results.filter { $0 == .hard }.count }
     var goodCount: Int { results.filter { $0 == .good }.count }
 
     private var shouldPromptReview: Bool {
@@ -574,7 +475,6 @@ struct SummaryView: View {
 
             VStack(spacing: 14) {
                 SummaryRow(icon: "checkmark.circle.fill", color: .green, label: "Gewusst", count: goodCount, total: total)
-                SummaryRow(icon: "minus.circle.fill", color: .orange, label: "Fast", count: hardCount, total: total)
                 SummaryRow(icon: "xmark.circle.fill", color: .red, label: "Nochmal", count: againCount, total: total)
             }
             .padding(20)

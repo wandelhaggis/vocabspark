@@ -26,8 +26,8 @@ targets:
       path: Sources/FrenchVocab/Info.plist
       properties:
         CFBundleDisplayName: "VocabSpark"
-        CFBundleShortVersionString: "1.1.0"
-        CFBundleVersion: "3"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         UILaunchScreen:
           UIColorName: ""
         OPENAI_API_KEY: "$(OPENAI_API_KEY)"
@@ -40,9 +40,24 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.michikoenig.vocabspark
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        MARKETING_VERSION: "1.1.1"
-        CURRENT_PROJECT_VERSION: "4"
+        MARKETING_VERSION: "1.2.0"
+        CURRENT_PROJECT_VERSION: "5"
         SWIFT_EMIT_LOC_STRINGS: "YES"
         LOCALIZATION_PREFERS_STRING_CATALOGS: "YES"
     scheme:
-      testTargets: []
+      testTargets:
+        - VocabSparkTests
+
+  VocabSparkTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests/VocabSparkTests
+    dependencies:
+      - target: VocabSpark
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.michikoenig.vocabspark.tests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/VocabSpark.app/VocabSpark"
+        BUNDLE_LOADER: "$(TEST_HOST)"

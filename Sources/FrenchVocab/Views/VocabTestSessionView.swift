@@ -15,32 +15,30 @@ struct VocabTestSessionView: View {
     private var answerFontSize: CGFloat { hSize == .compact ? 24 : 30 }
     private var cardPadding: CGFloat { hSize == .compact ? 20 : 32 }
 
-    @State private var cardDeck: [VocabItem]
-    @State private var mastered: Set<UUID> = []
+    /// Deck state machine: failed cards come back at a random later position.
+    @State private var engine: SessionDeckEngine
     @State private var isRevealed = false
     @State private var showingSummary = false
     @State private var resolvedDirection: LearningDirection = .frToDE
     @State private var ttsTask: Task<Void, Never>?
-    /// Fix #20: track IDs that were shown more than once (= not mastered on first attempt)
-    @State private var repeatedCards: Set<UUID> = []
     @State private var showSuccessFlash = false
-    @State private var isAdvancing = false
-    @State private var advanceTask: Task<Void, Never>?
+    @State private var flashResetTask: Task<Void, Never>?
+    @State private var summaryTask: Task<Void, Never>?
 
     @FocusState private var isFocused: Bool
 
-    let totalCount: Int
+    private let itemsByID: [UUID: VocabItem]
 
     init(items: [VocabItem], direction: LearningDirection, deck: LanguageDeck) {
         self.items = items
         self.direction = direction
         self.deck = deck
-        self.totalCount = items.count
-        _cardDeck = State(initialValue: items)
+        self.itemsByID = Dictionary(items.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        _engine = State(initialValue: SessionDeckEngine(cardIDs: items.map(\.id), reinsertPolicy: .randomLater))
     }
 
     var current: VocabItem? {
-        cardDeck.first
+        engine.currentID.flatMap { itemsByID[$0] }
     }
 
     var promptText: String {
@@ -69,13 +67,14 @@ struct VocabTestSessionView: View {
         Group {
             if showingSummary {
                 testSummary
-            } else if current != nil {
+            } else {
                 cardView
             }
         }
         .onDisappear {
             ttsTask?.cancel()
-            advanceTask?.cancel()  // Fix #19
+            flashResetTask?.cancel()
+            summaryTask?.cancel()
             tts.stop()
         }
     }
@@ -98,8 +97,8 @@ struct VocabTestSessionView: View {
                                 endPoint: .trailing
                             )
                         )
-                        .frame(width: totalCount > 0 ? geo.size.width * CGFloat(mastered.count) / CGFloat(totalCount) : 0)
-                        .animation(.spring(duration: 0.4), value: mastered.count)
+                        .frame(width: engine.totalCount > 0 ? geo.size.width * CGFloat(engine.mastered.count) / CGFloat(engine.totalCount) : 0)
+                        .animation(.spring(duration: 0.4), value: engine.mastered.count)
                 }
             }
             .frame(height: 5)
@@ -119,13 +118,13 @@ struct VocabTestSessionView: View {
                     .foregroundStyle(.secondary)
                 }
                 Spacer()
-                Text("\(mastered.count) von \(totalCount)")
+                Text("\(engine.mastered.count) von \(engine.totalCount)")
                     .font(.subheadline)
                     .fontWeight(.semibold)
                     .fontDesign(.rounded)
                     .foregroundStyle(.secondary)
-                if !repeatedCards.isEmpty {
-                    Text("\u{B7} \(repeatedCards.count) wiederholt")
+                if !engine.repeatedIDs.isEmpty {
+                    Text("\u{B7} \(engine.repeatedIDs.count) wiederholt")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
@@ -134,73 +133,34 @@ struct VocabTestSessionView: View {
 
             Spacer()
 
-            // Card content
-            VStack(spacing: 20) {
-                // Prompt card
-                VStack(spacing: 14) {
-                    Text(isTermPrompt ? "\(deck.emoji) \(deck.displayName)" : deck.nativeLabel)
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
-                        .tracking(1.5)
-
-                    Text(promptText)
-                        .font(.system(size: promptFontSize, weight: .semibold, design: .rounded))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-
-                    if isTermPrompt && tts.isAvailable {
-                        ttsButton(text: promptText)
-                    }
-
-                    if let example = promptExample {
-                        Divider().padding(.horizontal, 20)
-                        exampleRow(text: example, isTerm: isTermPrompt)
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .padding(cardPadding)
-                .background(.background)
-                .clipShape(RoundedRectangle(cornerRadius: 20))
-                .shadow(color: .black.opacity(0.08), radius: 12, y: 4)
-
-                // Answer (revealed)
-                if isRevealed {
-                    VStack(spacing: 14) {
-                        Text(isTermPrompt ? deck.nativeLabel : "\(deck.emoji) \(deck.displayName)")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.secondary)
-                            .textCase(.uppercase)
-                            .tracking(1.5)
-
-                        Text(answerText)
-                            .font(.system(size: answerFontSize, weight: .medium, design: .rounded))
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-
-                        if !isTermPrompt && tts.isAvailable {
-                            ttsButton(text: answerText)
-                        }
-
-                        if let example = answerExample {
-                            Divider().padding(.horizontal, 20)
-                            exampleRow(text: example, isTerm: !isTermPrompt)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(28)
-                    .background(Color(.systemGray6))
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
+            // Card content — fresh identity per advance (see SessionCardView).
+            Group {
+                if current != nil {
+                    SessionCardView(
+                        promptLabel: isTermPrompt ? "\(deck.emoji) \(deck.displayName)" : deck.nativeLabel,
+                        answerLabel: isTermPrompt ? deck.nativeLabel : "\(deck.emoji) \(deck.displayName)",
+                        promptText: promptText,
+                        answerText: answerText,
+                        promptExample: promptExample,
+                        answerExample: answerExample,
+                        promptIsTerm: isTermPrompt,
+                        ttsLanguage: deck.ttsLanguage,
+                        isRevealed: isRevealed,
+                        promptFontSize: promptFontSize,
+                        answerFontSize: answerFontSize,
+                        cardPadding: cardPadding,
+                        leftBadge: .init(icon: "arrow.counterclockwise.circle.fill", color: .orange),
+                        rightBadge: .init(icon: "checkmark.circle.fill", color: .green),
+                        onSwipe: handleSwipe
+                    )
+                    .id(engine.generation)
                     .transition(.asymmetric(
-                        insertion: .scale(scale: 0.9).combined(with: .opacity),
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
                         removal: .opacity
                     ))
                 }
             }
             .padding(.horizontal, 28)
-            .animation(.spring(duration: 0.35, bounce: 0.2), value: isRevealed)
 
             Spacer()
 
@@ -211,31 +171,33 @@ struct VocabTestSessionView: View {
                     .padding(.bottom, 8)
             }
 
-            // Bottom buttons
-            if isRevealed {
-                drillButtons
-                    .padding(.horizontal, 20)
+            // Bottom buttons (hidden once the deck is empty and the summary is pending)
+            if !engine.isFinished {
+                if isRevealed {
+                    drillButtons
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 32)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                } else {
+                    Button {
+                        revealCard()
+                    } label: {
+                        Text("Aufdecken")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .fontDesign(.rounded)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(
+                                LinearGradient(colors: [.indigo, .purple], startPoint: .leading, endPoint: .trailing)
+                            )
+                            .foregroundStyle(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .shadow(color: .indigo.opacity(0.3), radius: 8, y: 4)
+                    }
+                    .padding(.horizontal, 28)
                     .padding(.bottom, 32)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-            } else {
-                Button {
-                    revealCard()
-                } label: {
-                    Text("Aufdecken")
-                        .font(.title3)
-                        .fontWeight(.bold)
-                        .fontDesign(.rounded)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(
-                            LinearGradient(colors: [.indigo, .purple], startPoint: .leading, endPoint: .trailing)
-                        )
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .shadow(color: .indigo.opacity(0.3), radius: 8, y: 4)
                 }
-                .padding(.horizontal, 28)
-                .padding(.bottom, 32)
             }
         }
         .background(
@@ -315,101 +277,72 @@ struct VocabTestSessionView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16))
             }
         }
-    }
-
-    // MARK: - Helpers
-
-    @ViewBuilder
-    private func exampleRow(text: String, isTerm: Bool) -> some View {
-        HStack(spacing: 8) {
-            Text("\u{AB}\(text)\u{BB}")
-                .font(.subheadline)
-                .italic()
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-
-            if isTerm && tts.isAvailable {
-                Button {
-                    ttsTask?.cancel()
-                    ttsTask = Task { await tts.speak(text, language: deck.ttsLanguage) }
-                } label: {
-                    Image(systemName: tts.isPlaying ? "speaker.wave.3.fill" : "speaker.wave.2")
-                        .font(.caption)
-                        .foregroundStyle(.indigo)
-                }
-                .disabled(tts.isLoading || tts.isPlaying)
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func ttsButton(text: String) -> some View {
-        Button {
-            ttsTask?.cancel()
-            ttsTask = Task { await tts.speak(text, language: deck.ttsLanguage) }
-        } label: {
-            HStack(spacing: 6) {
-                Image(systemName: tts.isLoading ? "hourglass" : (tts.isPlaying ? "speaker.wave.3.fill" : "speaker.wave.2"))
-                Text("Anh\u{F6}ren")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-            }
-            .foregroundStyle(.indigo)
-        }
-        .disabled(tts.isLoading || tts.isPlaying)
+        // Pin physical order: orange must stay left so it matches swipe-left,
+        // also in RTL languages (same approach as the pinned i18n arrows).
+        .environment(\.layoutDirection, .leftToRight)
     }
 
     // MARK: - Logic
 
     private func revealCard() {
+        guard current != nil else { return }
         HapticService.light()
         withAnimation { isRevealed = true }
     }
 
+    private func handleSwipe(_ direction: CardSwipeDirection) {
+        if direction == .right {
+            rateMastered()
+        } else {
+            rateNochmal()
+        }
+    }
+
     private func rateNochmal() {
-        guard !isAdvancing, !cardDeck.isEmpty else { return }
+        // Only a revealed card can be rated (closes the double-tap window).
+        guard isRevealed, current != nil else { return }
+        isRevealed = false
         HapticService.medium()
         ttsTask?.cancel()
         tts.stop()
 
-        let item = cardDeck.removeFirst()
-        // Fix #20: this card will be seen again, mark it as repeated
-        repeatedCards.insert(item.id)
-        // Insert at a random later position so the card comes back
-        let insertAt = cardDeck.isEmpty ? 0 : Int.random(in: min(2, cardDeck.count)...cardDeck.count)
-        cardDeck.insert(item, at: insertAt)
-
-        isRevealed = false
+        withAnimation(cardAdvanceAnimation) { engine.rateAgain() }
         resolveDirection()
     }
 
     private func rateMastered() {
-        // Fix #1: block rapid re-taps during flash animation
-        guard !isAdvancing, let item = cardDeck.first else { return }
-        isAdvancing = true
+        guard isRevealed, current != nil else { return }
+        isRevealed = false
         HapticService.success()
         ttsTask?.cancel()
         tts.stop()
 
-        showSuccessFlash = true
-        advanceTask = Task {
-            try? await Task.sleep(nanoseconds: 350_000_000)
-            // Fix #19: abort if the view was dismissed during the flash
-            guard !Task.isCancelled else { return }
-            // Fix #2: progress + card-removal happen together
-            withAnimation {
-                showSuccessFlash = false
-                mastered.insert(item.id)
-                cardDeck.removeFirst()
-            }
-            isAdvancing = false
+        withAnimation(cardAdvanceAnimation) { _ = engine.rateGood() }
+        flashSuccess()
 
-            if cardDeck.isEmpty {
+        if engine.isFinished {
+            summaryTask = Task {
+                try? await Task.sleep(nanoseconds: 450_000_000)
+                guard !Task.isCancelled else { return }
                 withAnimation { showingSummary = true }
-            } else {
-                isRevealed = false
-                resolveDirection()
             }
+        } else {
+            resolveDirection()
+        }
+    }
+
+    private var cardAdvanceAnimation: Animation {
+        .spring(duration: 0.35, bounce: 0.15)
+    }
+
+    /// Decorative, non-blocking success flash.
+    private func flashSuccess() {
+        flashResetTask?.cancel()
+        showSuccessFlash = true
+        flashResetTask = Task {
+            try? await Task.sleep(nanoseconds: 300_000_000)
+            guard !Task.isCancelled else { return }
+            showSuccessFlash = false
         }
     }
 
@@ -436,18 +369,18 @@ struct VocabTestSessionView: View {
             }
 
             VStack(spacing: 8) {
-                Text("\(totalCount) Vokabeln gemeistert")
+                Text("\(engine.totalCount) Vokabeln gemeistert")
                     .font(.title3)
                     .fontWeight(.semibold)
                     .fontDesign(.rounded)
                 // Fix #20: only claim "first try" if no card was ever repeated
-                if repeatedCards.isEmpty {
+                if engine.repeatedIDs.isEmpty {
                     Text("Alles beim ersten Mal!")
                         .font(.subheadline)
                         .foregroundStyle(.green)
                         .fontWeight(.medium)
                 } else {
-                    Text("\(repeatedCards.count) Vokabeln wiederholt")
+                    Text("\(engine.repeatedIDs.count) Vokabeln wiederholt")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }

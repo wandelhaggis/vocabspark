@@ -1,14 +1,12 @@
 import Foundation
 
-/// Simplified SM-2 algorithm with 3 rating levels.
+/// Simplified SM-2 algorithm with 2 rating levels.
 /// Rating:
-///   0 = Nochmal (failed)
-///   1 = Fast (hesitant)
-///   2 = Gewusst (confident)
-enum SRSRating: Int {
-    case again = 0
-    case hard = 1
-    case good = 2
+///   .again = Nochmal (failed → reset, due tomorrow)
+///   .good  = Gewusst (confident → normal progression)
+enum SRSRating {
+    case again
+    case good
 }
 
 struct SRSEngine {
@@ -23,18 +21,6 @@ struct SRSEngine {
             item.repetitions = 0
             item.interval = 1
             item.easeFactor = max(1.3, item.easeFactor - 0.2)
-
-        case .hard:
-            // Progresses but slowly
-            if item.repetitions == 0 {
-                item.interval = 1
-            } else if item.repetitions == 1 {
-                item.interval = 3
-            } else {
-                item.interval = max(1, Int(Double(item.interval) * 1.2))
-            }
-            item.easeFactor = max(1.3, item.easeFactor - 0.15)
-            item.repetitions += 1
 
         case .good:
             // Standard SM-2 progression

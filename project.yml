@@ -48,6 +48,9 @@ targets:
         UILaunchScreen:
           UIColorName: ""
         OPENAI_API_KEY: "$(OPENAI_API_KEY)"
+        # Nur OS-Verschlüsselung (HTTPS/Keychain) -> exempt; unterdrückt den
+        # Export-Compliance-Dialog bei jedem Upload.
+        ITSAppUsesNonExemptEncryption: false
         UIBackgroundModes:
           - remote-notification
         UISupportedInterfaceOrientations:

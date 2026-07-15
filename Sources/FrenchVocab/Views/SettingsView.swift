@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
+import CloudKit
 
 struct SettingsView: View {
     let deck: LanguageDeck
@@ -12,6 +13,9 @@ struct SettingsView: View {
     @State private var keyInput = ""
     @State private var showSaved = false
 
+    // iCloud sync visibility: a broken sync must never be silent
+    @State private var iCloudAccountStatus: CKAccountStatus?
+
     // CSV Import
     @State private var showingFileImporter = false
     @State private var importResult: CSVImportResult?
@@ -19,6 +23,32 @@ struct SettingsView: View {
     @State private var importError: String?
 
     var isConfigured: Bool { !storedKey.isEmpty }
+
+    private var iCloudSyncActive: Bool {
+        VocabSparkApp.isCloudKitSyncEnabled && iCloudAccountStatus == .available
+    }
+
+    private var iCloudSyncTitle: String {
+        if !VocabSparkApp.isCloudKitSyncEnabled { return "iCloud-Sync inaktiv" }
+        switch iCloudAccountStatus {
+        case .available: return "iCloud-Sync aktiv"
+        case .noAccount: return "Kein iCloud-Konto"
+        case nil:        return "iCloud wird gepr\u{FC}ft \u{2026}"
+        default:         return "iCloud nicht verf\u{FC}gbar"
+        }
+    }
+
+    private var iCloudSyncDetail: String {
+        if !VocabSparkApp.isCloudKitSyncEnabled {
+            return "Deine Vokabeln werden nur auf diesem Ger\u{E4}t gespeichert"
+        }
+        switch iCloudAccountStatus {
+        case .available: return "Deine Vokabeln werden automatisch in iCloud gesichert"
+        case .noAccount: return "Melde dich in den iOS-Einstellungen bei iCloud an, damit deine Vokabeln gesichert werden"
+        case nil:        return "Verbindung zu iCloud wird gepr\u{FC}ft"
+        default:         return "Deine Vokabeln werden gerade nur auf diesem Ger\u{E4}t gespeichert"
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -38,6 +68,23 @@ struct SettingsView: View {
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
+                    }
+                    HStack {
+                        Image(systemName: iCloudSyncActive ? "icloud.fill" : "icloud.slash.fill")
+                            .foregroundStyle(iCloudSyncActive ? .green : .orange)
+                            .font(.title3)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(LocalizedStringKey(iCloudSyncTitle))
+                                .fontWeight(.medium)
+                            Text(LocalizedStringKey(iCloudSyncDetail))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .task {
+                        iCloudAccountStatus = try? await CKContainer(
+                            identifier: VocabSparkApp.cloudKitContainerID
+                        ).accountStatus()
                     }
                 }
 

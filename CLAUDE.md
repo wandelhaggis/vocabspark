@@ -21,7 +21,8 @@ xcodebuild test -project VocabSpark.xcodeproj -scheme VocabSpark -destination 'p
 
 **SwiftUI + SwiftData** app for learning vocabulary in any language with spaced repetition (Foreign Language ↔ DE).
 
-- **Data layer**: `LanguageDeck` model represents a language (name, emoji, TTS code). `VocabItem` has `term`/`translation` fields and a `deck` relationship. `SessionRecord` stores learning session results. All persisted via SwiftData.
+- **Data layer**: `LanguageDeck` model represents a language (name, emoji, TTS code). `VocabItem` has `term`/`translation` fields and a `deck` relationship. `SessionRecord` stores learning session results. All persisted via SwiftData, synced to the user's private iCloud database via CloudKit (`ModelConfiguration(cloudKitDatabase: .private("iCloud.com.michikoenig.vocabspark"))` in `FrenchVocabApp`).
+- **CloudKit model constraints** (apply to ALL `@Model` classes, sync breaks silently if violated): every property needs a default value or must be optional; all relationships must be optional and have an explicit inverse (declared on `LanguageDeck` via `@Relationship`); `@Attribute(.unique)` is forbidden. Before an App Store release with schema changes: run a Debug build first, then deploy the schema Development → Production in the CloudKit Console (TestFlight and App Store builds use the Production environment).
 - **Multi-language**: Users create language decks from a predefined list (16 languages). Each deck has its own vocabulary. A `LanguagePickerView` is shown on app start.
 - **SRS engine**: `SRSEngine` is a stateless struct with a single static method `apply(rating:to:)` that mutates a `VocabItem` in place. Implements a 2-button SM-2 variant (`.again` = reset / `.good` = progress).
 - **Session deck**: `SessionDeckEngine` is a model-free state machine (card rotation, repeated-card tracking, `generation` counter for card view identity). Unit-tested in `Tests/VocabSparkTests`.
@@ -33,7 +34,7 @@ xcodebuild test -project VocabSpark.xcodeproj -scheme VocabSpark -destination 'p
 
 ## Key Conventions
 
-- UI language is **German** (labels, buttons, status text)
+- UI language is **German** (labels, buttons, status text); all 16 UI languages live in `Sources/FrenchVocab/Localizable.xcstrings` (source language `de`, German text = key). Every new user-facing string needs entries for all 15 target languages before release. Careful: strings built dynamically (e.g. computed properties wrapped in `LocalizedStringKey(...)`) are NOT auto-extracted by Xcode — add their catalog entries manually (`extractionState: manual`). Plural keys use variations (pl/ru: one/few/many/other, ar: zero/one/two/few/many/other, ja/ko/zh-Hans: other only). Language-neutral keys get `shouldTranslate: false`.
 - iPad-only: `TARGETED_DEVICE_FAMILY: "2"` in project.yml
 - Deployment target: iOS 17.0, Swift 5.9
 - No external dependencies — pure Apple frameworks + OpenAI REST API

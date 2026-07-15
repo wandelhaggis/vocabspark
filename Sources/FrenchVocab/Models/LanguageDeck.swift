@@ -1,16 +1,26 @@
 import Foundation
 import SwiftData
 
+// CloudKit sync constraints (apply to ALL @Model classes):
+// every property needs a default value or must be optional, all
+// relationships must be optional with an explicit inverse, and
+// @Attribute(.unique) is not allowed.
 @Model
 final class LanguageDeck {
-    var id: UUID
-    var name: String               // "Französisch", "Spanisch" (display in UI language)
-    var emoji: String              // "🇫🇷", "🇪🇸"
-    var ttsLanguage: String        // "French", "Spanish" (English name, for GPT/TTS prompts)
+    var id: UUID = UUID()
+    var name: String = ""          // "Französisch", "Spanisch" (display in UI language)
+    var emoji: String = ""         // "🇫🇷", "🇪🇸"
+    var ttsLanguage: String = ""   // "French", "Spanish" (English name, for GPT/TTS prompts)
     /// ISO 639-1 code of the native language (the "back" of the card, UI side).
     /// Default "de" for legacy decks created before v2.0.
     var nativeLanguageCode: String = "de"
-    var createdAt: Date
+    var createdAt: Date = Date()
+
+    @Relationship(deleteRule: .cascade, inverse: \VocabItem.deck)
+    var items: [VocabItem]? = []
+
+    @Relationship(deleteRule: .cascade, inverse: \MasteryEvent.deck)
+    var masteryEvents: [MasteryEvent]? = []
 
     init(name: String, emoji: String, ttsLanguage: String, nativeLanguageCode: String = "de") {
         self.id = UUID()

@@ -81,13 +81,26 @@ struct AddLanguageView: View {
     }
 
     private func createDeck(_ lang: LanguageOption) {
-        let deck = LanguageDeck(
-            name: lang.name,
-            emoji: lang.emoji,
-            ttsLanguage: lang.ttsLanguage,
-            nativeLanguageCode: nativeCode
+        // CloudKit cannot enforce uniqueness — reuse an existing deck of the
+        // same language pair instead of inserting a duplicate (e.g. when the
+        // iCloud import after a reinstall hasn't finished yet).
+        let tts = lang.ttsLanguage
+        let native = nativeCode
+        let descriptor = FetchDescriptor<LanguageDeck>(
+            predicate: #Predicate { $0.ttsLanguage == tts && $0.nativeLanguageCode == native }
         )
-        modelContext.insert(deck)
+        let deck: LanguageDeck
+        if let existing = (try? modelContext.fetch(descriptor))?.first {
+            deck = existing
+        } else {
+            deck = LanguageDeck(
+                name: lang.name,
+                emoji: lang.emoji,
+                ttsLanguage: lang.ttsLanguage,
+                nativeLanguageCode: nativeCode
+            )
+            modelContext.insert(deck)
+        }
         HapticService.success()
         dismiss()
         onCreated(deck)

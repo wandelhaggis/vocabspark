@@ -19,18 +19,20 @@ enum VocabCategory: String, CaseIterable {
     }
 }
 
+// CloudKit sync: every property needs a default or must be optional,
+// relationships optional with inverse (declared on LanguageDeck), no .unique.
 @Model
 final class VocabItem {
-    var id: UUID
-    var term: String            // the word being learned (foreign language)
-    var translation: String     // the translation (German / native)
-    var createdAt: Date
+    var id: UUID = UUID()
+    var term: String = ""        // the word being learned (foreign language)
+    var translation: String = "" // the translation (German / native)
+    var createdAt: Date = Date()
 
     // SRS fields
-    var interval: Int
-    var easeFactor: Double
-    var repetitions: Int
-    var nextReviewDate: Date
+    var interval: Int = 0
+    var easeFactor: Double = 2.5
+    var repetitions: Int = 0
+    var nextReviewDate: Date = Date()
     var lastReviewedAt: Date?
 
     // Example sentence (auto-generated via GPT)

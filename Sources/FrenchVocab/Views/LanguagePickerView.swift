@@ -27,6 +27,15 @@ struct LanguagePickerView: View {
                 Text("F\u{FC}ge eine Sprache hinzu, um loszulegen.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                if VocabSparkApp.isCloudKitSyncEnabled {
+                    // Reinstall case: the iCloud import runs asynchronously and
+                    // the store looks empty for a moment.
+                    Text("Falls du die App schon mal benutzt hast, l\u{E4}dt iCloud deine Sprachen gleich automatisch.")
+                        .font(.footnote)
+                        .foregroundStyle(.tertiary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 48)
+                }
             } else {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                     ForEach(decks) { deck in
@@ -75,7 +84,7 @@ struct LanguagePickerView: View {
         } message: { deck in
             let count = deckStats[deck.id]?.total ?? 0
             if count > 0 {
-                Text("Alle \(count) Vokabeln werden mitgel\u{F6}scht.")
+                Text("Alle \(count) Vokabeln und dein Lernfortschritt werden endg\u{FC}ltig gel\u{F6}scht, auch aus iCloud.")
             } else {
                 Text("Diese Sprache wird entfernt.")
             }
@@ -141,16 +150,8 @@ struct LanguagePickerView: View {
     }
 
     private func deleteDeck(_ deck: LanguageDeck) {
-        // Cascade: delete all vocab items of this deck
-        let deckID = deck.id
-        let descriptor = FetchDescriptor<VocabItem>(
-            predicate: #Predicate { $0.deck?.id == deckID }
-        )
-        if let items = try? modelContext.fetch(descriptor) {
-            for item in items {
-                modelContext.delete(item)
-            }
-        }
+        // Cascade delete rules on LanguageDeck remove its vocab items and
+        // mastery events (covered by DeckCascadeDeleteTests).
         modelContext.delete(deck)
         HapticService.success()
         refreshStats()

@@ -22,6 +22,20 @@ targets:
     configFiles:
       Debug: Config.xcconfig
       Release: Config.xcconfig
+    entitlements:
+      path: Sources/FrenchVocab/VocabSpark.entitlements
+      properties:
+        com.apple.developer.icloud-services:
+          - CloudKit
+        com.apple.developer.icloud-container-identifiers:
+          - iCloud.com.michikoenig.vocabspark
+        # CloudKit push (silent) notifications. After archiving, verify the
+        # distribution build carries aps-environment=production
+        # (codesign -d --entitlements - VocabSpark.app). Independent of this:
+        # the CloudKit SCHEMA must be deployed Development -> Production in
+        # the CloudKit Console before every release with model changes —
+        # TestFlight and App Store builds sync against Production.
+        aps-environment: development
     info:
       path: Sources/FrenchVocab/Info.plist
       properties:
@@ -31,6 +45,8 @@ targets:
         UILaunchScreen:
           UIColorName: ""
         OPENAI_API_KEY: "$(OPENAI_API_KEY)"
+        UIBackgroundModes:
+          - remote-notification
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
           - UIInterfaceOrientationPortraitUpsideDown
